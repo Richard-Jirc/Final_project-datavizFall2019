@@ -12,103 +12,109 @@
 		
 		<script type="text/javascript">
 			
+			var parseDate_time = d3.timeParse("%Y/%m/%d%H%M")
+			var parseTime = d3.timeParse("%H%M")
+			var parseDate = d3.timeParse("%Y/%m/%d")
+			
+			var formatHour = d3.timeFormat("%H")
+			var formatMin = d3.timeFormat("%M")
+			var formatYear_day = d3.timeFormat("%j")
+			var formatYear = d3.timeFormat("%Y")
+			
 			var convert = function(d) {
 				return {
-					year: d.year
+					bc_time: parseDate(d.bcdate),
+					smt_time: parseDate_time(d.smtdate + d.smttime),
+					min_locate: parseFloat(formatHour(parseTime(d.smttime))) * 60 + parseFloat(formatMin(parseTime(d.smttime))),
+					day_locate: parseFloat(formatYear_day(parseDate(d.smtdate)))
 				}
 			}
 			
-			d3.csv("expeditions_raw.csv", convert)
+			d3.csv("raw_data/successful_expeditions_raw.csv", convert)
 			.then(function(d) {
 				
+				console.log(d)
+				
+				data = d
 				
 				
-				var count = {}
-				var index = []
-				
-				// console.log(d[0].year)
-				
-				for (var i=1960; i <= 2018; i++) {
-					index.push(i)
-				}
-				// console.log(index)
-				
-				for (var r=0; r<index.length; r++) {
-					if (Object.keys(index[r]).indexOf(count) == -1) {
-						count[index[r]] = 0;
-					}
-				}
-				
-				// console.log(count)
-				
-				for (var j=0; j<d.length; j++) {
-					// console.log(d[j].year)
-					for (var k=0; k<index.length; k++) {
-						if (d[j].year == index[k]) {
-							count[index[k]] = count[index[k]] + 1
-							break
-						}
-					}
-				}
-				// console.log(count)
-				
-				var dataset = []
-				
-				for (i in count) {
-					// console.log(count[i])
-					dataset.push(count[i])
-				}
-				// console.log(dataset)
-				
-				
-				var w = 1400, h = 400
+				var w = 1400, h = 400, padding = 10
 				
 				var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
 				
-				var xscale = d3.scaleBand()
-					.domain(d3.range(dataset.length))
-					.range([0, w])
-					.paddingInner(0.3)
+				var xScale = d3.scaleLinear()
+					.domain([0, 1440])
+					.range([0 + padding, w - padding])
 				
-				var yscale = d3.scaleLinear()
-					.domain([0,d3.max(dataset)])
-					.range([0, h - 50])
+				var yScale = d3.scaleLinear()
+					.domain([0, 365])
+					.range([0 + padding, h - padding])
 				
-				svg.selectAll("rect")
-				.data(dataset)
+				
+				var hour = []
+				for (var j=0; j<=24; j++) {
+					hour.push(j)
+				}
+				console.log(hour)
+				
+				var textScale = d3.scaleBand()
+					.domain(d3.range(hour.length))
+					.range([0 + padding, w - padding])
+				
+				var hourScale = d3.scaleLinear()
+					.domain([1960, 2018])
+					.range(["blue", "red"])
+				
+				svg.selectAll(".hour_axis")
+				.data(hour)
 				.enter()
-				.append("rect")
-				.attr("x", function(d, i) { return xscale(i)})
-				.attr("y", function(d) { return h - yscale(d) - 20})
-				.attr("width", xscale.bandwidth())
-				.attr("height", function(d) {return yscale(d)})
-				.attr("fill", "black")
+				.append("line")
+				.attr("class", "hour_axis")
+				.attr("x1", function(d,i) {
+					return textScale(i);
+				})
+				.attr("y1", padding)
+				.attr("x2", function(d,i) {
+					return textScale(i);
+				})
+				.attr("y2", h - padding)
+				.attr("stroke", "rgb(200, 200, 200)")
+				
+				
+				
+				svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("cx", function(d) {
+						return xScale(d.min_locate);
+					})
+					.attr("cy", function(d) {
+						return yScale(d.day_locate);
+					})
+					.attr("r", "2px")
+					// .filter(function(d) {
+					// 	return (data.min_locate != null) && (data.day_locate != null)
+					// })
+					.attr("opacity", 0.5)
+					.attr("fill", function(d) {
+						return hourScale(parseFloat(formatYear(d.smt_time)));
+					})
 				
 				svg.selectAll("text")
-				.data(dataset)
-				.enter()
-				.append("text")
-				.attr("class","one")
-				.attr("x", function(d, i) { return xscale(i) + xscale.bandwidth()/2})
-				.attr("y", function(d) { return h - yscale(d) - 24})
-				.text(function(d) { return d })
-				.attr("fill", "black")
-				.attr("text-anchor", "middle")
-				.attr("font-size", "10px")
+					.data(hour)
+					.enter()
+					.append("text")
+					.attr("x", function(d,i) {
+						return textScale(i);
+					})
+					.attr("y", h)
+					.text(function(d) { return d; })
+					.attr("text-anchor", "middle")
+					.attr("fill", "black")
+					.attr("font-size", "12px")
 				
-				svg.selectAll(".two")
-				.data(dataset)
-				.enter()
-				.append("text")
-				.attr("class", "two")
-				.attr("x", function(d, i){
-					
-					return xscale(i) + xscale.bandwidth()/2})
-				.attr("y", h)
-				.text(function(d, i) { return index[i]})
-				.attr("fill", "black")
-				.attr("text-anchor", "middle")
-				.attr("font-size", "9px")
+				
 			})
 			
 		</script>
