@@ -91,13 +91,18 @@
 					.attr("cx", function(d) {
 						return dateScale(d.day_locate);
 					})
-					.attr("r", "2px")
 					.attr("opacity", 0)
 					.transition()
-					.duration(200)
+					.duration(500)
 					.delay(function(d,i) {
 						return 40 * i;
 					})
+					.on("start", function() {
+						d3.select(this)
+						.attr("r","30px")
+						.attr("fill", "black")
+					})
+					.attr("r", "2px")
 					.attr("opacity", 0.5)
 					.attr("fill", function(d) {
 						return hourScale(parseFloat(formatYear(d.smt_time)));
