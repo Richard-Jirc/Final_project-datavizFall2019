@@ -33,8 +33,7 @@
 			d3.csv("raw_data/successful_expeditions_raw.csv", convert)
 			.then(function(d) {
 				
-				console.log(d)
-				
+				// console.log(d)
 				data = d
 				
 				
@@ -42,13 +41,13 @@
 				
 				var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
 				
-				var xScale = d3.scaleLinear()
+				var timeScale = d3.scaleLinear()
 					.domain([0, 1440])
-					.range([0 + padding, w - padding])
-				
-				var yScale = d3.scaleLinear()
-					.domain([0, 365])
 					.range([0 + padding, h - padding])
+				
+				var dateScale = d3.scaleLinear()
+					.domain([0, 365])
+					.range([0 + padding, w - padding])
 				
 				
 				var hour = []
@@ -59,7 +58,7 @@
 				
 				var textScale = d3.scaleBand()
 					.domain(d3.range(hour.length))
-					.range([0 + padding, w - padding])
+					.range([0 + padding, h - padding])
 				
 				var hourScale = d3.scaleLinear()
 					.domain([1960, 2018])
@@ -70,14 +69,14 @@
 				.enter()
 				.append("line")
 				.attr("class", "hour_axis")
-				.attr("x1", function(d,i) {
+				.attr("y1", function(d,i) {
 					return textScale(i);
 				})
-				.attr("y1", padding)
-				.attr("x2", function(d,i) {
+				.attr("x1", padding)
+				.attr("y2", function(d,i) {
 					return textScale(i);
 				})
-				.attr("y2", h - padding)
+				.attr("x2", w - padding)
 				.attr("stroke", "rgb(200, 200, 200)")
 				
 				
@@ -86,17 +85,17 @@
 					.data(data)
 					.enter()
 					.append("circle")
-					.attr("cx", function(d) {
-						return xScale(d.min_locate);
-					})
 					.attr("cy", function(d) {
-						return yScale(d.day_locate);
+						return timeScale(d.min_locate);
+					})
+					.attr("cx", function(d) {
+						return dateScale(d.day_locate);
 					})
 					.attr("r", "2px")
 					// .filter(function(d) {
 					// 	return (data.min_locate != null) && (data.day_locate != null)
 					// })
-					.attr("opacity", 0.5)
+					.attr("opacity", 0.3)
 					.attr("fill", function(d) {
 						return hourScale(parseFloat(formatYear(d.smt_time)));
 					})
@@ -105,10 +104,10 @@
 					.data(hour)
 					.enter()
 					.append("text")
-					.attr("x", function(d,i) {
+					.attr("y", function(d,i) {
 						return textScale(i);
 					})
-					.attr("y", h)
+					.attr("x", padding)
 					.text(function(d) { return d; })
 					.attr("text-anchor", "middle")
 					.attr("fill", "black")
