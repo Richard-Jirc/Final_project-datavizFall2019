@@ -62,22 +62,22 @@
 				
 				var hourScale = d3.scaleLinear()
 					.domain([1960, 2018])
-					.range(["blue", "red"])
+					.range(["green", "red"])
 				
 				svg.selectAll(".hour_axis")
-				.data(hour)
-				.enter()
-				.append("line")
-				.attr("class", "hour_axis")
-				.attr("y1", function(d,i) {
-					return textScale(i);
-				})
-				.attr("x1", padding)
-				.attr("y2", function(d,i) {
-					return textScale(i);
-				})
-				.attr("x2", w - padding)
-				.attr("stroke", "rgb(200, 200, 200)")
+					.data(hour)
+					.enter()
+					.append("line")
+					.attr("class", "hour_axis")
+					.attr("y1", function(d,i) {
+						return textScale(i);
+					})
+					.attr("x1", padding)
+					.attr("y2", function(d,i) {
+						return textScale(i);
+					})
+					.attr("x2", w - padding)
+					.attr("stroke", "rgb(200, 200, 200)")
 				
 				
 				
@@ -92,10 +92,13 @@
 						return dateScale(d.day_locate);
 					})
 					.attr("r", "2px")
-					// .filter(function(d) {
-					// 	return (data.min_locate != null) && (data.day_locate != null)
-					// })
-					.attr("opacity", 0.3)
+					.attr("opacity", 0)
+					.transition()
+					.duration(200)
+					.delay(function(d,i) {
+						return 40 * i;
+					})
+					.attr("opacity", 0.5)
 					.attr("fill", function(d) {
 						return hourScale(parseFloat(formatYear(d.smt_time)));
 					})
