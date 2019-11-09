@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>tEsT</title>
+		<script type="text/javascript" src="../d3.js"></script>
+		<style type="text/css">
+			
+		</style>
+	</head>
+	<body>
+		
+		<script type="text/javascript">
+			
+			var convert = function(d) {
+				return {
+					year: d.year
+				}
+			}
+			
+			d3.csv("expeditions_raw.csv", convert)
+			.then(function(d) {
+				
+				
+				
+				var count = {}
+				var index = []
+				
+				// console.log(d[0].year)
+				
+				for (var i=1960; i <= 2018; i++) {
+					index.push(i)
+				}
+				// console.log(index)
+				
+				for (var r=0; r<index.length; r++) {
+					if (Object.keys(index[r]).indexOf(count) == -1) {
+						count[index[r]] = 0;
+					}
+				}
+				
+				// console.log(count)
+				
+				for (var j=0; j<d.length; j++) {
+					// console.log(d[j].year)
+					for (var k=0; k<index.length; k++) {
+						if (d[j].year == index[k]) {
+							count[index[k]] = count[index[k]] + 1
+							break
+						}
+					}
+				}
+				// console.log(count)
+				
+				var dataset = []
+				
+				for (i in count) {
+					// console.log(count[i])
+					dataset.push(count[i])
+				}
+				// console.log(dataset)
+				
+				
+				var w = 1400, h = 400
+				
+				var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
+				
+				var xscale = d3.scaleBand()
+					.domain(d3.range(dataset.length))
+					.range([0, w])
+					.paddingInner(0.3)
+				
+				var yscale = d3.scaleLinear()
+					.domain([0,d3.max(dataset)])
+					.range([0, h - 50])
+				
+				svg.selectAll("rect")
+				.data(dataset)
+				.enter()
+				.append("rect")
+				.attr("x", function(d, i) { return xscale(i)})
+				.attr("y", function(d) { return h - yscale(d) - 20})
+				.attr("width", xscale.bandwidth())
+				.attr("height", function(d) {return yscale(d)})
+				.attr("fill", "black")
+				
+				svg.selectAll("text")
+				.data(dataset)
+				.enter()
+				.append("text")
+				.attr("class","one")
+				.attr("x", function(d, i) { return xscale(i) + xscale.bandwidth()/2})
+				.attr("y", function(d) { return h - yscale(d) - 24})
+				.text(function(d) { return d })
+				.attr("fill", "black")
+				.attr("text-anchor", "middle")
+				.attr("font-size", "10px")
+				
+				svg.selectAll(".two")
+				.data(dataset)
+				.enter()
+				.append("text")
+				.attr("class", "two")
+				.attr("x", function(d, i){
+					
+					return xscale(i) + xscale.bandwidth()/2})
+				.attr("y", h)
+				.text(function(d, i) { return index[i]})
+				.attr("fill", "black")
+				.attr("text-anchor", "middle")
+				.attr("font-size", "9px")
+			})
+			
+		</script>
+	</body>
+</html>
