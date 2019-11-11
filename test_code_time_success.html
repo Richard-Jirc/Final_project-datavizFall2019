@@ -21,11 +21,12 @@
 			var formatYear_day = d3.timeFormat("%j")
 			var formatYear = d3.timeFormat("%Y")
 			
-			var seetrue = function(d) {
-				if (d == "TRUE") {
-					return true
+			
+			var clock = function(d) {
+				if (d.length == 3) {
+					return "0" + d;
 				} else {
-					return false
+					return d;
 				}
 			}
 			
@@ -33,28 +34,28 @@
 				return {
 					bc_time: parseDate(d.bcdate),
 					smt_year: parseDate(d.smtdate),
+					smt_clock: parseTime(clock(d.smttime)),
 					smt_time: parseDate_time(d.smtdate + "/" +d.smttime),
-					min_locate: parseFloat(formatHour(parseTime(d.smttime))) * 60 + parseFloat(formatMin(parseTime(d.smttime))),
+					min_locate: parseFloat(formatHour(parseTime(clock(d.smttime)))) * 60 + parseFloat(formatMin(parseTime(clock(d.smttime)))),
 					day_locate: parseFloat(formatYear_day(parseDate(d.smtdate))),
-					time_locate: (parseFloat(formatYear(parseDate(d.smtdate))) - 1960) * 365 + parseFloat(formatYear_day(parseDate(d.smtdate))),
-					success: seetrue(d.success2)
+					time_locate: (parseFloat(formatYear(parseDate(d.smtdate))) - 1960) * 365 + parseFloat(formatYear_day(parseDate(d.smtdate)))
 				}
 			}
 			
 			d3.csv("raw_data/successful_expeditions_raw.csv", convert)
 			.then(function(d) {
 				
-				console.log(d)
+				// console.log(d)
 				data = d
 				
-				// for (i=0; i < data.length; i++) {
-				// 	if (data[i].smt_year == null) {
-				// 		console.log("error");
-				// 	}
-				// }
-				// console.log("complete")
+				for (i=0; i < data.length; i++) {
+					if (data[i].smt_time == null) {
+						console.log("error");
+					}
+				}
+				console.log("complete")
 				
-				// console.log(data[69])
+				console.log(data[0])
 				
 				var w = 1400, h = 400, padding = 10
 				
@@ -74,7 +75,7 @@
 					time_locate.push(data[i].time_locate)
 				}
 				
-				var startTime = 200, endSec = 60
+				var startTime = 200, endSec = 5
 				
 				var yearScale = d3.scaleLinear()
 					.domain([0, d3.max(time_locate)])
@@ -123,9 +124,9 @@
 						return timeScale(d.min_locate);
 					})
 					.attr("opacity", 0)
-						.filter( function(d) {
-							return d.smt_time != null
-						})
+					.filter( function(d) {
+						return d.smt_time != null
+					})
 					.transition()
 					.duration(500)
 					.delay(function(d,i) {
