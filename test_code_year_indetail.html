@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>tEsT</title>
+		<script type="text/javascript" src="../d3.js"></script>
+		<style type="text/css">
+			
+		</style>
+	</head>
+	<body>
+		
+		<script type="text/javascript">
+			
+			var parseDate_time = d3.timeParse("%Y/%m/%d/%H%M")
+			var parseTime = d3.timeParse("%H%M")
+			var parseDate = d3.timeParse("%Y/%m/%d")
+			
+			var formatHour = d3.timeFormat("%H")
+			var formatMin = d3.timeFormat("%M")
+			var formatYear_day = d3.timeFormat("%j")
+			var formatYear = d3.timeFormat("%Y")
+			
+			
+			var clock = function(d) {
+				if (d.length == 3) {
+					return "0" + d;
+				} else {
+					return d;
+				}
+			}
+			
+			var convert = function(d) {
+				return {
+					bc_time: parseDate(d.bcdate),
+					smt_year: parseDate(d.smtdate),
+					smt_clock: parseTime(clock(d.smttime)),
+					smt_time: parseDate_time(d.smtdate + "/" +d.smttime),
+					min_locate: parseFloat(formatHour(parseTime(clock(d.smttime)))) * 60 + parseFloat(formatMin(parseTime(clock(d.smttime)))),
+					day_locate: parseFloat(formatYear_day(parseDate(d.smtdate))),
+					time_locate: (parseFloat(formatYear(parseDate(d.smtdate))) - 1960) * 365 + parseFloat(formatYear_day(parseDate(d.smtdate)))
+				}
+			}
+			
+			d3.csv("raw_data/successful_expeditions_raw.csv", convert)
+			.then(function(d) {
+				
+				// console.log(d)
+				data = d
+				
+				for (i=0; i < data.length; i++) {
+					if (data[i].smt_time == null) {
+						console.log("error");
+					}
+				}
+				console.log("complete")
+				
+				console.log(data[0])
+				
+				var w = 1400, h = 400, padding = 10
+				
+				var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
+				
+				var timeScale = d3.scaleLinear()
+					.domain([0, 1440])
+					.range([0 + padding, h - padding])
+				
+				var dateScale = d3.scaleLinear()
+					.domain([0, 365])
+					.range([0 + padding, w - padding])
+				
+				var time_locate = []
+				
+				for(i=0; i<data.length; i++) {
+					time_locate.push(data[i].time_locate)
+				}
+				
+				var startTime = 200, endSec = 60
+				
+				var yearScale = d3.scaleLinear()
+					.domain([0, d3.max(time_locate)])
+					.range([startTime, endSec * 1000])
+					
+				
+				var hour = []
+				for (var j=0; j<=24; j++) {
+					hour.push(j)
+				}
+				// console.log(hour)
+				
+				var textScale = d3.scaleBand()
+					.domain(d3.range(hour.length))
+					.range([0 + padding, h - padding])
+				
+				var hourScale = d3.scaleLinear()
+					.domain([1960, 2018])
+					.range(["green", "red"])
+				
+				svg.selectAll(".hour_axis")
+					.data(hour)
+					.enter()
+					.append("line")
+					.attr("class", "hour_axis")
+					.attr("y1", function(d,i) {
+						return textScale(i);
+					})
+					.attr("x1", padding)
+					.attr("y2", function(d,i) {
+						return textScale(i);
+					})
+					.attr("x2", w - padding)
+					.attr("stroke", "rgb(220, 220, 220)")
+				
+				
+				
+				svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("cx", function(d) {
+						return dateScale(d.day_locate);
+					})
+					.attr("cy", function(d) {
+						return timeScale(d.min_locate);
+					})
+					.attr("opacity", 0)
+					.filter( function(d) {
+						return d.smt_time != null
+					})
+					.transition()
+					.duration(500)
+					.delay(function(d,i) {
+						return yearScale(d.time_locate);
+					})
+					.on("start", function() {
+						d3.select(this)
+						.attr("r","30px")
+						.attr("fill", "red")
+					})
+					.attr("r", "2px")
+					.attr("opacity", 0.5)
+					.attr("fill", function(d) {
+						return hourScale(parseFloat(formatYear(d.smt_year)));
+					})
+				
+				svg.selectAll("text")
+					.data(hour)
+					.enter()
+					.append("text")
+					.attr("y", function(d,i) {
+						return textScale(i);
+					})
+					.attr("x", padding)
+					.text(function(d) { return d; })
+					.attr("text-anchor", "middle")
+					.attr("fill", "black")
+					.attr("font-size", "12px")
+				
+				
+			})
+			
+		</script>
+	</body>
+</html>

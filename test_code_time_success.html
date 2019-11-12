@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>tEsT</title>
-		<script type="text/javascript" src="../d3.js"></script>
+		<script type="text/javascript" src="d3.js"></script>
 		<style type="text/css">
 			
 		</style>
@@ -75,7 +75,7 @@
 					time_locate.push(data[i].time_locate)
 				}
 				
-				var startTime = 200, endSec = 60
+				var startTime = 200, endSec = 30
 				
 				var yearScale = d3.scaleLinear()
 					.domain([0, d3.max(time_locate)])
@@ -134,7 +134,7 @@
 					})
 					.on("start", function() {
 						d3.select(this)
-						.attr("r","30px")
+						.attr("r","20px")
 						.attr("fill", "red")
 					})
 					.attr("r", "2px")
