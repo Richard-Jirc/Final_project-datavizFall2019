@@ -30,6 +30,14 @@
 				}
 			}
 			
+			var seetrue = function(d) {
+				if (d == "TRUE") {
+					return true;
+				} else (d == "FALSE") {
+					return false;
+				}
+			}
+			
 			var convert = function(d) {
 				return {
 					bc_time: parseDate(d.bcdate),
@@ -42,7 +50,7 @@
 				}
 			}
 			
-			d3.csv("raw_data/successful_expeditions_raw.csv", convert)
+			d3.csv("raw_data/expeditions_raw.csv", convert)
 			.then(function(d) {
 				
 				// console.log(d)
