@@ -14,11 +14,11 @@ var step2 = function() {
 }
 
 var step3 = function() {
-	console.log("2")
+	console.log("3")
 }
 
 var step4 = function() {
-	console.log("2")
+	console.log("4")
 }
 
 
@@ -61,7 +61,8 @@ var page_transition = function() {
 
 //更新页面+执行绘图命令函数，每次换页时调用
 var update_Content = function(page) {
-	//更换页面上各个元素的loop
+	
+	//更换intro_zone显示
 	for (i=0 ; i<maxPage; i++) {
 		if (i == page) {
 			d3.select("#intro_zone_words_"+ page).attr("class", null)
@@ -71,6 +72,8 @@ var update_Content = function(page) {
 			// console.log("hided page" + i)
 		}
 	}
+	
+	execution[page]()
 }
 
 
