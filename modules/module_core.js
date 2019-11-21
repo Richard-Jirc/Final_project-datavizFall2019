@@ -1,60 +1,1399 @@
-console.log("CORE.js LOADED")
 
+
+var width_DOM = d3.select("#svg_zone_Container").style("width")
+var height_DOM = d3.select("#svg_zone_Container").style("height")
+	
+var WIDTH = parseFloat(width_DOM.slice(0, width_DOM.length-2))
+var HEIGHT = parseFloat(height_DOM.slice(0, height_DOM.length-2))
+
+
+var create_svg = function() {
+	return d3.select("#svg_zone_Container").append("svg").attr("width", WIDTH).attr("height", HEIGHT)
+}
 
 var step0 = function() {
-	console.log("0")
+	
+	console.log("step0 LOADED")
+	
+	svg = create_svg()
+	
+	var parseDate_time = d3.timeParse("%Y/%m/%d/%H%M"),
+		parseTime = d3.timeParse("%H%M"),
+		parseDate = d3.timeParse("%Y/%m/%d")
+	
+	var formatHour = d3.timeFormat("%H"),
+		formatMin = d3.timeFormat("%M"),
+		formatYear_day = d3.timeFormat("%j"),
+		formatYear = d3.timeFormat("%Y")
+	
+	var time_calibrate = function(d) {
+		if (d.length == 3) {
+			return "0" + d;
+		} else {
+			return d;
+		}
+	}
+	
+	var seeBoolean = function(d) {
+		if (d == "TRUE") {
+			return true
+		} else { return false }
+	}
+	
+	var convert = function(d) {
+		return {
+			suc_flag: seeBoolean(d.success1),
+			smt_year_obj: parseDate( d.smtdate ),   // YYYY/mm/dd  (NO invalid data)
+			smt_clock_obj: parseTime( time_calibrate(d.smttime) ),   // 1900/01/01/HH:MM  (invalid data YES)
+			smt_time_obj: parseDate_time( d.smtdate + "/" + d.smttime ),   // YYYY/mm/dd/HH:MM (invalid data YES)
+			min_locate: parseFloat( formatHour(parseTime( time_calibrate(d.smttime) )) ) * 60 + parseFloat(formatMin(parseTime(time_calibrate(d.smttime)))),
+			day_locate: parseFloat(formatYear_day(parseDate(d.smtdate))),
+			year_locate: (parseFloat(formatYear(parseDate(d.smtdate))) - 1960) * 365 + parseFloat(formatYear_day(parseDate(d.smtdate))),
+			count: 0,
+			season_position: 0,
+			season_flag: 0,
+			clock_position: 0,
+			clock_flag: 0
+		}
+	}
+	
+	d3.csv("raw_data/expeditions_raw.csv", convert)
+	.then(function(d) {
+		
+		data = d
+		// console.log(data)
+		
+		for (i=0; i < data.length; i++) {
+			if (data[i].smt_clock_obj == null) {
+				console.log("error");
+			}
+		}
+		console.log("complete")
+		
+		// console.log(data)
+		
+		 
+		var w = WIDTH, h = HEIGHT
+		var lapse_margin = {left: 50, bottom: 50, top: 50, right: 0}
+		
+		var draw_lapseElements = function() {
+			
+			var margin = lapse_margin
+			
+			var hour = []
+			for (var j=0; j<=24; j++) { hour.push(j) }
+			
+			var axisScale = d3.scaleLinear()
+			.domain([0, 24])
+			.range([margin.top, h - margin.bottom])
+			
+			var appear = 500
+			
+			//背景时刻指示线
+			svg.selectAll(".axis_time")
+				.data(hour)
+				.enter()
+				.append("line")
+				.attr("class", "show_elements")
+				.attr("x1", margin.left)
+				.attr("x2", w)
+				.attr("stroke", "rgb(200, 200, 200)")
+				.attr("stroke-dasharray", "2,3")
+					.attr("opacity", 0)
+					.attr("y1", function(d,i) { return axisScale(i) / 1.2 })
+					.attr("y2", function(d,i) { return axisScale(i) / 1.2 })
+					.transition()
+					.duration(appear)
+					.delay(200)
+				.attr("opacity", 1)
+				.attr("y1", function(d,i) { return axisScale(i); })
+				.attr("y2", function(d,i) { return axisScale(i); })
+			
+			//左侧时刻标签
+			svg.selectAll(".time_label")
+				.data(hour)
+				.enter()
+				.append("text")
+				.attr("class", "show_elements")
+				.text(function(d) {
+					return d + ":00"
+				})
+					.attr("text-anchor", "end")
+					.attr("fill", "rgb(180, 180, 180)")
+					.attr("font-size", "10px")
+				.attr("x", margin.left - 20)
+					.attr("opacity", 0)
+					.attr("y", function(d,i) { return axisScale(i) / 1.2 })
+					.transition()
+					.duration(appear)
+					.delay(200)
+				.attr("opacity", 1)
+				.attr("y", function(d,i) { return axisScale(i) + 4 })
+			
+			//画顶部月标签
+			var position_array = [[0, 2/12], [2/12, 5/12], [5/12, 8/12], [8/12, 11/12], [11/12, 1]],
+				color_array = ["grey", "grey", "grey", "grey", "grey"],
+				month_array = ["WINTER", "SPRING", "SUMMER", "AUTUMN", "WINTER"]
+				y = 20,
+				span = w - 50
+			
+			
+			//细线
+			svg.selectAll(".bg_line")
+				.data(position_array)
+				.enter()
+				.append("line")
+				.attr("class", "show_elements")
+				.attr("x1", function(d) { return span * d[1] + margin.left;})
+				.attr("x2", function(d) { return span * d[1] + margin.left;})
+				.attr("y1", y)
+				.attr("y2", h - margin.bottom)
+				.attr("stroke", "rgb(220, 220, 220)")
+				.attr("stroke-dasharray", "2,2")
+					.attr("opacity", 0)
+					.transition()
+					.duration("appear")
+					.delay(200)
+				.attr("opacity", 1)
+			
+			//粗线
+			svg.selectAll(".month_line")
+				.data(position_array)
+				.enter()
+				.append("line")
+				.attr("class", "show_elements")
+				.attr("x1", function(d) { return span * d[0] + margin.left; })
+				.attr("x2", function(d) { return span * d[1] + margin.left; })
+				.attr("y1", y)
+				.attr("y2", y)
+				.attr("stroke-width", "5px")
+				.attr("stroke", function(d,i){ return color_array[i]; })
+					.attr("opacity", 0)
+					.transition()
+					.duration("appear")
+					.delay(200)
+				.attr("opacity", 0.5)
+			
+			//标签
+			svg.selectAll(".month_name")
+				.data(month_array)
+				.enter()
+				.append("text")
+				.attr("class", "show_elements")
+				.text(function(d) { return d; })
+				.attr("x", function(d,i) {
+					return span * (position_array[i][1] + position_array[i][0]) / 2 + margin.left
+				})
+				.attr("y", y - 10)
+				.attr("text-anchor", "middle")
+				.attr("font-size", "10px")
+				.attr("fill", function(d,i) { return color_array[i]; })
+					.attr("opacity", 0)
+					.transition()
+					.duration("appear")
+					.delay(200)
+				.attr("opacity", 0.5)
+				
+			
+				
+			
+		}
+		
+		var draw_timelapse = function(sec) {
+			// console.log("time lapse begins")
+			
+			var margin = lapse_margin
+			
+			// x scale
+			var dateScale = d3.scaleLinear()
+				.domain([0, 365])
+				.range([0 + margin.left, w - margin.right])
+		
+			// y scale
+			var timeScale = d3.scaleTime()
+				.domain([new Date(1900, 0, 1, 0, 0), new Date(1900, 0, 1, 23, 59)])
+				.range([0 + margin.top, h - margin.bottom])
+			
+			
+			//控制动画时间数据
+			var startTime = 200, endSec = sec
+			var long = 3000, short = 200
+		
+			var year_locate_array = [] //delay, duration的scale函数调用
+		
+			for(i=0; i<data.length; i++) { year_locate_array.push(data[i].year_locate) }
+		
+			var delayScale = d3.scaleLinear()
+				.domain([0, d3.max(year_locate_array)])
+				.range([startTime, endSec * 1000])
+		
+			var durationScale = d3.scaleLinear()
+				.domain([0, d3.max(year_locate_array)])
+				.range([long, short])
+			
+			var year_hueScale = d3.scaleLinear()
+				.domain([1960, 2018])
+				.range(["rgb(0,0,255)", "rgb(0,255,0)"])
+			
+			
+			//筛选成功登顶且有有效登顶时刻数据，用于画圆，推时间数据
+			var expd_validcheck = function(d) {
+				return (d.smt_clock_obj != null) && (d.suc_flag)
+			}
+			
+			//用于计算每个时间标签显示时长
+			var delay_array = []
+			
+			for (var i=0; i<data.length; i++) {
+				if (expd_validcheck(data[i])) {
+					delay_array.push(delayScale(data[i].year_locate))
+				}
+			}
+			delay_array.push(endSec * 1000)
+			
+			var temp_successCount = 0 //显示成功次数计数
+			
+			//显示登顶时间具体信息
+			svg.selectAll(".event_tag")
+				.data(data)
+				.enter()
+				.append("text")
+				.attr("class", "step0")
+				.attr("class", "dym_tag")
+				.filter( function(d) { return expd_validcheck(d) })
+					.attr("font-size", "20px")
+					.attr("font-family", "Lucida Console")
+					.attr("fill", "grey")
+					.attr("text-anchor", "end")
+				.attr("x", w - margin.right)
+				.attr("y", h)
+				.text( function(d) {
+					var displayTime = d3.timeFormat("%Y/%m/%d")
+					temp_successCount += 1
+					return "success:" + temp_successCount + " " + " " + displayTime(d.smt_year_obj)
+				})
+				.attr("opacity", 0)
+					.transition()
+					.duration(function(d,i) {
+						return (delay_array[i+1] - delay_array[i])
+					})
+					.delay(function(d,i) {
+						return delayScale(d.year_locate);
+					})
+					.on("start" , function() {
+						d3.select(this)
+						.attr("opacity", 1)
+					})
+					.on("end", function(d,i) {
+						if (i == delay_array.length - 2) {
+							d3.select(this)
+							.attr("opacity", 1)
+						} else {
+							d3.select(this).remove()
+						}
+					})
+			
+			var year_lapse_array = []
+			for (var i=1960; i<=2018; i++) {
+				var time = i + "/01/01"
+				year_lapse_array.push(delayScale((parseFloat(formatYear(parseDate(time))) - 1960) * 365 + parseFloat(formatYear_day(parseDate(time)))))
+			}
+			year_lapse_array.push(endSec * 1000)
+			
+			//显示动画进度年份
+			svg.selectAll(".year_tag")
+				.data(year_lapse_array)
+				.enter()
+				.append("text")
+				.attr("class", "step0")
+				.attr("class", "dym_tag")
+					.attr("font-family", "font-family: 'Century Gothic',CenturyGothic,AppleGothic,sans-serif")
+					.attr("font-size", "40px")
+					.attr("fill", "grey")
+					.attr("text-anchor", "start")
+				.attr("x", 0)
+				.attr("y", h)
+				.text(function(d,i) { return 1960 + i })
+				.attr("opacity", 0)
+					.transition()
+					.duration(function(d,i) {
+						return year_lapse_array[i+1] - year_lapse_array[i]
+					})
+					.delay(function(d,i) {
+						return d
+					})
+					.on("start", function() {
+						d3.select(this).attr("opacity", 1)
+					})
+					.on("end", function(d,i) {
+						if (i == year_lapse_array.length - 2) {
+							d3.select(this)
+							.attr("opacity", 1)
+						} else {
+							d3.select(this).remove()
+						}
+					})
+			
+			
+			//带延时画圆
+			svg.selectAll(".expedition_circles")
+				.data(data)
+				.enter()
+				.append("circle")
+				.attr("class", "step0")
+				.attr("class", "expedition_circles")
+				.attr("cx", function(d) {
+					return dateScale(d.day_locate);
+				})
+				.attr("cy", function(d) {
+					return timeScale(d.smt_clock_obj);
+				})
+				.attr("opacity", 0)
+					.attr("r", "2px")
+					.attr("fill", function(d) {
+						return year_hueScale(parseFloat(formatYear(d.smt_year_obj)));
+					})
+				.filter( function(d) {
+					return expd_validcheck(d)
+				})
+					.transition("appear")
+					.duration(function(d,i) {
+						return durationScale(d.year_locate)
+					})
+					.delay(function(d,i) {
+						return delayScale(d.year_locate);
+					})
+					.on("start", function() {
+						d3.select(this)
+						.attr("r","20px")
+					})
+				.attr("r", "2px")
+				.attr("opacity", 0.6)
+				.attr("fill", function(d) {
+					return year_hueScale(parseFloat(formatYear(d.smt_year_obj)));
+				})
+				
+				d3.select("#barChart_transform_button")
+				.classed("hidden", false);
+				
+				
+				
+			// console.log("circle LOADED")
+		}
+		
+		var show_season = function() {
+			
+			//用循环进行分组计数
+			var position_dict = {suc_1: -1, suc_2: -1, suc_3: -1, suc_4: -1, fal_1: -1, fal_2: -1, fal_3: -1, fal_4: -1}
+			for (var i=0; i<data.length; i++) {
+				var month = d3.timeFormat("%m")
+			
+				var k = parseFloat(month(data[i].smt_year_obj))
+				
+				if (k >= 3 && k <= 5) {
+					data[i].season_flag = 1
+					if (data[i].suc_flag == true) {
+						position_dict.suc_1 += 1
+						data[i].season_position = position_dict.suc_1
+					} else {
+						position_dict.fal_1 += 1
+						data[i].season_position = position_dict.fal_1
+					}
+				} else if (k >= 6 && k <= 8) {
+					data[i].season_flag = 2
+					if (data[i].suc_flag == true) {
+						position_dict.suc_2 += 1
+						data[i].season_position = position_dict.suc_2
+					} else {
+						position_dict.fal_2 += 1
+						data[i].season_position = position_dict.fal_2
+					}
+				} else if (k >= 9 && k <= 11) {
+					data[i].season_flag = 3
+					if (data[i].suc_flag == true) {
+						position_dict.suc_3 += 1
+						data[i].season_position = position_dict.suc_3
+					} else {
+						position_dict.fal_3 += 1
+						data[i].season_position = position_dict.fal_3
+					}
+				} else if (k == 12 || k == 1 || k == 2) {
+					data[i].season_flag = 4
+					if (data[i].suc_flag == true) {
+						position_dict.suc_4 += 1
+						data[i].season_position = position_dict.suc_4
+					} else {
+						position_dict.fal_4 += 1
+						data[i].season_position = position_dict.fal_4
+					}
+				}
+			}
+			
+			var padding = 20
+			var W = w - 2 * padding, H = h - 2 * padding
+			
+			//interactive背景框 & 显示百分比
+			svg.selectAll(".show_elements")
+			.data([1,2,3,4])
+			.enter()
+			.append("rect")
+			.attr("class", "show_elements")
+			.attr("x", function(d,i) {
+				return i * (0.25 * W) + padding
+			})
+			.attr("y", padding)
+			.attr("width", 0.25 * W)
+			.attr("height", H)
+			.attr("fill", function(d,i) {
+				if (i == 0) { return "gold" }
+				else { return "grey"}
+			})
+			.attr("opacity", 0.1)
+				.on("mouseover", function(d,i) {
+					
+					var k = i
+					
+					d3.select(this)
+					.transition("over")
+					.attr("opacity", 0.8)
+					
+					var sum = position_dict["suc_" + d] + position_dict["fal_" + d]
+					var suc_p = Math.round((position_dict["suc_" + d] / sum) * 100)
+					var fal_p = 100 - suc_p
+					
+					
+					svg.append("text") //失败率
+					.text(fal_p + "%")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "30px")
+					.attr("x", function() {
+						return padding + (0.5 + k) * 0.25 * W
+					})
+					.attr("y", padding + gap + 40)
+					
+					svg.append("text") //failure rate
+					.text("failure rate")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "18px")
+					.attr("x", function() {
+						return padding + (0.5 + k) * 0.25 * W
+					})
+					.attr("y", padding + gap + 70)
+					
+					
+					svg.append("text") //成功率
+					.text(suc_p + "%")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "30px")
+					.attr("x", function() {
+						return padding + (0.5 + k) * 0.25 * W
+					})
+					.attr("y", H - gap - 40)
+					
+					svg.append("text") //success rate
+					.text("success rate")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "18px")
+					.attr("x", function() {
+						return padding + (0.5 + k) * 0.25 * W
+					})
+					.attr("y", H - gap - 10)
+					
+					
+				})
+				.on("mouseout", function() {
+					d3.select(this)
+					.transition("out")
+					.attr("opacity", 0.1)
+					
+					d3.selectAll(".pop_numbers")
+					.classed("inactive", false)
+					.transition()
+					.remove()
+				})
+			
+			
+			var gap = 0.1 * (0.25 * W) //组团与月份区边界值
+			var x_column = Math.floor((0.25 * W - 2 * gap) / 6)//列数
+			
+			var xPosit = function(d) {
+				var colScale = d3.scaleLinear()
+				.domain([0, x_column])
+				.range( [
+					(d.season_flag - 1) * 0.25 * W + gap + padding,
+					(d.season_flag) * 0.25 * W - gap + padding
+				] )
+				return colScale(d.season_position % x_column)
+				
+			}
+			
+			var yPosit = function(d) {
+				var rowH = 6
+				if (d.suc_flag == true) {
+					return H - gap - (Math.floor(d.season_position / x_column) - 1) * rowH
+				} else {
+					return gap + (Math.floor(d.season_position / x_column)) * rowH + padding
+				}
+			}
+			
+			//变换圆位置！！
+			d3.selectAll(".expedition_circles")
+			.attr("opacity", 1)
+			.transition()
+			.attr("cx", function(d) {
+				return xPosit(d)
+			})
+			.attr("cy", function(d) {
+				return yPosit(d)
+			})
+			.filter(function(d) {
+				return d.suc_flag == false
+			})
+			.attr("opacity", 0.5)
+			
+		}
+		
+		var show_clock = function() {
+			
+			var position_dict = {suc_1: -1, suc_2: -1, suc_3: -1, suc_4: -1, fal_1: -1, fal_2: -1, fal_3: -1, fal_4: -1}
+			for (var i=0; i<data.length; i++) {
+				var k = parseFloat(formatHour(data[i].smt_clock_obj))
+				if (data[i].smt_clock_obj != null) {
+					if (k >= 0 && k <= 5) {
+						data[i].clock_flag = 1
+						if (data[i].suc_flag == true) {
+							position_dict.suc_1 += 1
+							data[i].clock_position = position_dict.suc_1
+						} else {
+							position_dict.fal_1 += 1
+							data[i].clock_position = position_dict.fal_1
+						}
+					} else if (k >= 6 && k <= 12) {
+						data[i].clock_flag = 2
+						if (data[i].suc_flag == true) {
+							position_dict.suc_2 += 1
+							data[i].clock_position = position_dict.suc_2
+						} else {
+							position_dict.fal_2 += 1
+							data[i].clock_position = position_dict.fal_2
+						}
+					} else if (k >= 12 && k <= 18) {
+						data[i].clock_flag = 3
+						if (data[i].suc_flag == true) {
+							position_dict.suc_3 += 1
+							data[i].clock_position = position_dict.suc_3
+						} else {
+							position_dict.fal_3 += 1
+							data[i].clock_position = position_dict.fal_3
+						}
+					} else if (k >= 19 && k <= 23) {
+						data[i].clock_flag = 4
+						if (data[i].suc_flag == true) {
+							position_dict.suc_4 += 1
+							data[i].clock_position = position_dict.suc_4
+						} else {
+							position_dict.fal_4 += 1
+							data[i].clock_position = position_dict.fal_4
+						}
+					}
+				}
+			}
+			for (var i in position_dict) {
+				if (position_dict[i] == -1) {
+					position_dict[i] = 0
+				}
+			}
+						
+			var padding = 20
+			var W = w - 2 * padding, H = h - 2 * padding
+			
+			//interactive背景框 & 显示百分比
+			svg.selectAll(".show_elements")
+			.data([1,2,3,4])
+			.enter()
+			.append("rect")
+			.attr("class", "show_elements")
+			.attr("x", padding)
+			.attr("y", function(d,i) {
+				return i * (0.25 * H) + padding
+			})
+			.attr("height", 0.25 * H)
+			.attr("width", W)
+			.attr("fill", function(d,i) {
+				if (i == 1) { return "gold" }
+				else { return "grey"}
+			})
+			.attr("opacity", 0.1)
+				.on("mouseover", function(d,i) {
+					var k = i
+					
+					d3.select(this)
+					.transition("over")
+					.attr("opacity", 0.8)
+					
+					var sum = position_dict["suc_" + d] + position_dict["fal_" + d]
+					var suc_p = Math.round((position_dict["suc_" + d] / sum) * 100)
+					var fal_p = 100 - suc_p
+					
+					svg.append("text") //成功率
+					.text(suc_p + "%")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "30px")
+					.attr("x", padding + 70)
+					.attr("y", function() {
+						return padding + (0.5 + k) * 0.25 * H - 5
+					})
+					
+					svg.append("text") //success rate
+					.text("success rate")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "18px")
+					.attr("x", padding + 70)
+					.attr("y", function() {
+						return padding + (0.5 + k) * 0.25 * H + 23
+					})
+					
+					svg.append("text") //失败率
+					.text(fal_p + "%")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "30px")
+					.attr("x", W - gap - 40)
+					.attr("y", function() {
+						return padding + (0.5 + k) * 0.25 * H - 5
+					})
+					
+					
+					svg.append("text") //failure rate
+					.text("failure rate")
+					.attr("class", "pop_numbers")
+						.attr("font-size", "18px")
+					.attr("x", W - gap - 40)
+					.attr("y", function() {
+						return padding + (0.5 + k) * 0.25 * H + 23
+					})
+					
+				})
+				.on("mouseout", function() {
+					d3.select(this)
+					.transition("out")
+					.attr("opacity", 0.1)
+					
+					d3.selectAll(".pop_numbers")
+					.classed("inactive", false)
+					.transition()
+					.remove()
+				})
+			
+			
+			var gap = 0.1 * (0.25 * W) //组团与月份区边界值
+			var y_row = Math.floor((0.25 * H - 2 * gap) / 6)//列数
+			
+			var xPosit = function(d) {
+				var colH = 6
+				if (d.suc_flag == false) {
+					return W - gap - (Math.floor(d.clock_position / y_row) - 1) * colH
+				} else {
+					return gap + (Math.floor(d.clock_position / y_row)) * colH + padding
+				}
+			}
+			
+			var yPosit = function(d) {
+				var rowScale = d3.scaleLinear()
+				.domain([0, y_row])
+				.range( [
+					(d.clock_flag - 1) * 0.25 * H + gap + padding,
+					(d.clock_flag) * 0.25 * H - gap + padding
+				] )
+				return rowScale(d.clock_position % y_row)
+			}
+			
+			//变换圆位置！！
+			d3.selectAll(".expedition_circles")
+			.filter(function(d) {
+				return d.smt_clock_obj != null
+			})
+			.attr("opacity", 1)
+			.transition()
+			.attr("cx", function(d) {
+				return xPosit(d)
+			})
+			.attr("cy", function(d) {
+				return yPosit(d)
+			})
+			.filter(function(d) {
+				return d.suc_flag == false
+			})
+			.attr("opacity", 0.5)
+			
+		}
+		
+		var transform_barChart = function() {
+			
+			var year_count_dict = {}
+			
+			for (var i=1960; i<2019; i++) {
+				year_count_dict[i] = 0
+			}
+			
+			//年份内排序号计算
+			for (var k in data) {
+				yearTag = formatYear(data[k].smt_year_obj)
+				// console.log(yearTag)
+				if ((data[k].suc_flag == true)) {
+					year_count_dict[yearTag] += 1
+				}
+				
+				data[k].count = year_count_dict[yearTag]
+			}
+			
+			//用于yScale函数
+			var max = 0
+			for (var k in year_count_dict) {
+				if (max < year_count_dict[k]) { max = year_count_dict[k] }
+			}
+			
+			margin = {left: 20, top: 20, bottom: 50, right: 20}
+			
+			//x position as years
+			var yearScale = d3.scaleLinear()
+				.domain([1960, 2018])
+				.range([0 + margin.left, w - margin.right])
+			
+			//y as amounts
+			var yScale = d3.scaleLinear()
+				.domain([1, max])
+				.range([0 + margin.top, h - margin.bottom])
+			
+			//筛选成功登顶且有有效登顶时刻数据，用于画圆，推时间数据
+			var expd_validcheck = function(d) {
+				return (d.smt_clock_obj != null) && (d.suc_flag)
+			}
+			
+			svg.selectAll(".expedition_circles")
+				.attr("opacity", 1)
+				.transition()
+				.duration(4000)
+				.attr("cx", function(d,i) {
+					y = formatYear(d.smt_year_obj)
+					return yearScale(y)
+				})
+				.attr("cy", function(d) {
+					return h - yScale(d.count)
+				})
+			
+		}
+		
+		var reset_timelapse = function() {
+			
+			var margin = lapse_margin
+			
+			// x scale
+			var dateScale = d3.scaleLinear()
+				.domain([0, 365])
+				.range([0 + margin.left, w - margin.right])
+		
+			// y scale
+			var timeScale = d3.scaleTime()
+				.domain([new Date(1900, 0, 1, 0, 0), new Date(1900, 0, 1, 23, 59)])
+				.range([0 + margin.top, h - margin.bottom])
+			
+			
+			//控制动画时间数据
+			var startTime = 200, endSec = 60
+			var long = 2000, short = 50
+		
+			var year_locate_array = [] //delay, duration的scale函数调用
+		
+			for(i=0; i<data.length; i++) { year_locate_array.push(data[i].year_locate) }
+		
+			var delayScale = d3.scaleLinear()
+				.domain([0, d3.max(year_locate_array)])
+				.range([startTime, endSec * 1000])
+		
+			var durationScale = d3.scaleLinear()
+				.domain([0, d3.max(year_locate_array)])
+				.range([long, short])
+			
+			var year_hueScale = d3.scaleLinear()
+				.domain([1960, 2018])
+				.range(["blue", "gold"])
+			
+			var expd_validcheck = function(d) {
+				return (d.smt_clock_obj != null) && (d.suc_flag)
+			}
+			
+			svg.selectAll(".expedition_circles")
+			.transition()
+			.attr("opacity", 0.6)
+			.attr("cx", function(d) {
+				return dateScale(d.day_locate);
+			})
+			.attr("cy", function(d) {
+				return timeScale(d.smt_clock_obj);
+			})
+			
+		}
+		
+		
+		d3.select("#transform_guide").attr("class", "hidden")
+		
+		d3.select("#timelapse_settings").attr("class", null)
+		
+		
+		draw_lapseElements()
+		
+		//开始time lapse
+		d3.select("#secSubmit")
+		.on("click", function() {
+			var a = document.getElementById("timelapse_second").value
+			
+			draw_timelapse(a)
+			
+			d3.select("#timelapse_settings").classed("hidden", true)
+			
+			d3.select("#transform_guide")
+			.transition()
+			.delay(a * 1000)
+			.attr("class", null)
+		})
+		
+		//按季度分类变换
+		d3.select("#season_classify_transform_button")
+		.on("click", function() {
+			d3.selectAll(".dym_tag").remove()
+			d3.selectAll(".show_elements").remove()
+			d3.select("#timelapse_replay_button").classed("hidden", true);
+			d3.select("#return_button").classed("hidden", false);
+			
+			show_season(data)
+			
+		});
+		
+		//按时刻分类变换
+		d3.select("#hour_classify_transform_button")
+		.on("click", function() {
+			d3.selectAll(".dym_tag").remove()
+			d3.selectAll(".show_elements").remove()
+			d3.select("#timelapse_replay_button").classed("hidden", true);
+			d3.select("#return_button").classed("hidden", false);
+			
+			show_clock(data)
+			
+		})
+		
+		//年度柱状图变换
+		d3.select("#barChart_transform_button")
+		.on("click", function() {
+			d3.selectAll(".dym_tag").remove()
+			d3.selectAll(".show_elements").remove()
+			d3.select("#timelapse_replay_button").classed("hidden", true);
+			d3.select("#return_button").classed("hidden", false);
+			
+			transform_barChart()
+			
+		});
+		
+		//返回键
+		d3.select("#return_button")
+		.on("click", function() {
+			svg.selectAll(".show_elements").remove()
+
+			d3.select("#return_button").classed("hidden", true);
+			d3.select("#timelapse_replay_button").classed("hidden", false);
+			
+			draw_lapseElements()
+			reset_timelapse()
+		})
+		
+		//重放，重洗svg
+		d3.select("#timelapse_replay_button")
+		.on("click", function() {
+			svg.remove()
+			
+			step0()
+		})
+		
+	})
+	
 }
 
 var step1 = function() {
-	console.log("1")
+	
+	console.log("step1 LOADED")
+	
+	svg = create_svg()
+	
+	var w = WIDTH;
+	var h = HEIGHT;
+	var padding = 30;
+	
+	var chart1 = svg
+	
+	//creare movable circles
+	var radius = 10;
+
+	var circles = [5350,6100,6400,7350,7900,8850]
+	
+	svg.selectAll("circle")
+		.data(circles)
+		.enter()
+		.append("circle")
+		.attr("cx", function (d) { return padding; })
+		.attr("cy", function (d) { return h-(d-5350)/3500*(h-2*padding)-padding; })
+		.attr("r", radius)
+		.style("fill", "gold")
+		.on("mouseover", function (d) {d3.select(this).style("cursor", "move");})
+		.on("mouseout", function (d) {})
+		.call(d3.drag()
+			.on("start", dragstarted)
+			.on("drag", dragged)
+			.on("end", dragended)
+		);
+	
+	function dragstarted(d) {
+		d3.select(this).raise().classed("active", true);
+	}
+	
+	function dragged(d) {
+		d3.select(this).attr("cx", d.x = d3.event.x)
+		//!!!!IF YOU COMMENT OUT BELOW YOU WILL ONLY BE ABLE TO DRAG HORIZONTALLY
+		//.attr("cy", d.y = d3.event.y);
+	}
+	
+	function dragended(d) {
+		d3.select(this).classed("active", false);
+	}
+		
+		
+	var xScale = d3.scaleLinear()
+		.domain([0, 80])
+		 //.domain([d3.min(dataset, function(d){ return d[0]; }), d3.max(dataset, function(d) { return d[0]; })])
+		.range([padding, w - padding * 2]);
+		
+	var yScale = d3.scaleLinear()
+		//.domain([d3.min(dataset, function(d){ return d[1]; }), d3.max(dataset, function(d) { return d[1]; })])
+		.domain([5350,8850])
+		.range([h - padding, padding]);
+		
+		
+	var line = d3.line()
+		.x(function(d,i){
+			return xScale(d[0])
+		})
+		.y(function(d,i){
+			return yScale(d[1])
+		})
+		.curve(d3.curveMonotoneX)
+	
+	var area = d3.area()
+		.x(function(d,i){
+			return xScale(d[0])
+		})
+		.y0(function(d,i){
+			return yScale(d[1])
+		})
+		.y1(function(d,i){
+			return h-padding
+		})
+		.curve(d3.curveMonotoneX)
+		
+	legend=[[[0,5350],[80,5350]],[[0,6100],[80,6100]],[[0,6400],[80,6400]],[[0,7350],[80,7350]],[[0,7900],[80,7900]],[[0,8850],[80,8850]]]
+	
+	//draw x Axis and legends
+	
+		
+	for(var i=0; i<legend.length; i++){
+		
+		legendinside = legend[i]
+		
+		d3.select("svg")
+		   .append("path")
+		   .data([legendinside])
+		   .attr("d",line)
+		   .attr("fill", "none")//styles the line with attr
+		   .attr("class", "lines")
+		   .attr("stroke","black")
+		   .attr("opacity",0.5)
+		   .style("stroke-dasharray", ("1, 1"));
+		   
+		innerdataset = legend
+		
+		d3.select("svg")
+		   .selectAll("text")
+		   .data(innerdataset)
+		   .enter()
+		   .append("text")
+		   .text(function(d,i){
+			   //console.log(d[0][1])
+			   return d[0][1] + "m"
+		   }) 
+		   .attr("x", w-padding)
+		   .attr("y", function(d,i){
+			   console.log(yScale(d[0][1]))
+			   return yScale(d[0][1])
+			})
+		   .attr("font-family", "sans-serif")
+		   .attr("font-size", "11px")
+		   .attr("fill", "black");
+	}
+	
+	var formatDay = function(d) {
+		return "day" + " " + d;
+	}
+	
+	var xAxis = d3.axisBottom()
+		.scale(xScale)
+		.ticks(10)
+		.tickFormat(formatDay);
+		
+		
+	var yAxis = d3.axisLeft()
+		.scale(yScale)
+		.ticks(20);
+		
+	d3.select("svg")
+		.append("g")
+		.attr("class","axis")
+		.attr("transform","translate(0,"+ (h-padding) +")")
+		.call(xAxis)
+		
+	d3.select("svg")
+		.append("g")
+		.attr("class","axis")
+		.call(xAxis)
+	
+	//按钮触发显示登顶时间
+	d3.select("#show_trend_button")
+	.on("click", function() {
+		
+		d3.csv("raw_data/N_Col_NE_Ridge_6.csv")
+		.then(function(data) {
+			
+			var parsedData = parseRoute(data)
+			//console.log(parsedData)
+			
+			//画点和线循环，循环数据组数次
+			for(var i=0; i<parsedData.length; i++){
+				
+				time = i
+				
+				dataset = parsedData[i];
+				
+				t = 500
+				 
+				//画节点
+				svg.selectAll(".new")
+				   .data(dataset)
+				   .enter()
+				   .append("circle")
+				   .attr("class", "new")
+				   .attr("cx", function(d) {
+				   		return xScale(d[0]);
+				   })
+				   .attr("cy", function(d) {
+				   		return yScale(d[1]);
+				   })
+				   .attr("fill","gold")
+				   .attr("r", 10)
+				   .attr("class", "doned")
+				   .attr("opacity",0)
+				   .transition()
+				   .duration(t)
+				   .delay( function(d,i) {  return time * t})
+				   .attr("opacity",0.8)
+				   .attr("r", 2)
+				   .attr("fill","gold")
+				   
+				//画阴影
+				svg.append("path")
+				   .data([dataset])
+				   .attr("d",area)
+				   .attr("fill", "none")//styles the line with attr
+				   //.attr("class", "lines")
+				   .attr("stroke","none")
+				   .attr("opacity",0)
+				   .transition()
+				   .duration(t)
+				   .delay( function(d,i) {  return time * t})
+				   .attr("opacity",0.05)
+				   .attr("fill","grey")
+				   
+				//画面积
+				svg.append("path")
+				   .data([dataset])
+				   .attr("d",line)
+				   .attr("fill", "none")//styles the line with attr
+				   .attr("class", "lines")
+				   .attr("stroke","gold")
+				   .attr("opacity",0)
+				   .transition()
+				   .duration(t)
+				   .delay( function(d,i) {  return time * t})
+				   .attr("opacity",1)
+				   .attr("stroke-width",0.5)
+				   .attr("fill","none")
+			   }
+			   
+			   
+		   })
+		
+		
+		const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+		// a and b are javascript Date objects
+		function dateDiffInDays(a, b) {
+		  // Discard the time and time-zone information.
+		  const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+		  const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+		  
+		  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+		}
+	
+		//数据处理函数
+		function parseRoute(data){
+		
+			var formatted = []//Array to store new organized data
+			var simplified = []
+			
+			for(var i in data){
+                var year = data[i].year
+                formatted[i]=[]
+                simplified[i]=[]//each line is an array
+                if(data[i].route!=undefined){
+                    var route = data[i].route.split("),").join(")").split(")") // get each route data one by one
+                    //console.log(route)
+                    var parsedRoute = []
+                    for(var r in route){
+                        // r is the number of elements in each route array
+                        var complete = true
+                        var entry = route[r] //entry is a string
+                        var station = entry.split("(")[0]
+                        var stationRecord = entry.split("(")[1]
+                        if(stationRecord!=undefined){
+                            var sRList = stationRecord.split(",")
+                            if(sRList.length==2){
+								var parser2 = d3.timeParse("%d/%m/%Y")
+								var dateconverted = sRList[0] +"/"+ year
+                                var date = parser2(dateconverted)
+                                var elevation = sRList[1]
+                            }else{
+                                
+                                //when there is a missing value, then "NA" is substituted
+                                //you will have to decide how to draw
+                                if(stationRecord.includes("/")){
+                                    var date = parser2(stationRecord +"/"+ year)
+									if(station == "Smt")
+                                    var elevation = 8850
+										else complete = false
+                                }else{
+                                    var elevation = stationRecord
+                                    var date = "NA"
+									var complete = false
+                            
+                                }
+                            }
+							
+							if(date != "NA" && date != null){
+							   if(r==0){
+								   var day = 0
+							   }
+							   else
+								   if(formatted[i][0][1] != "NA" && formatted[i][0][1] != null)
+								   var day = dateDiffInDays(formatted[i][0][1],date)
+								   
+							}
+							else
+								{var day = "null"
+								var complete = false}
+							
+                            //you may need to put this in different formats
+                            formatted[i].push([station, date, elevation,year])
+							//console.log(complete)
+							if(complete == true)
+							simplified[i].push([day, parseInt(elevation)])
+							
+							else{
+							    //simplified[i].push([0,8850])
+								
+							}
+                        }
+                    }
+					if(complete == false)
+						simplified[i]=null
+						complete = true
+					
+                }
+            }
+            return simplified
+        }
+		
+
+	})
+	
+	
 }
 
 var step2 = function() {
-	console.log("2")
+	
+	console.log("step2 LOADED?")
+	
+	svg = create_svg()
+	
+	//The screen
+	// var array = []
+	var width = WIDTH;
+	var height = HEIGHT;
+	
+	//The nodes
+	dataset = [[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
+			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
+			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
+			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
+			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
+			['Alpine Ascents Intl.', 19], ['Himalayan Experience (Himex)', 16], ['SummitClimb', 15], ['Kobler & Partners', 14],
+			['Jagged Globe', 12], ['Adventure Consultants', 11], ['Seven Summit Treks', 10], ['Mountain Guides(IMG)', 9], ["Adventure Peaks", 8]];
+			
+	
+	var nodes = dataset.map(function(d) { return {radius:  d[1] * 8 + 10, caption: d[0]};}),
+			root = nodes[0],
+			color = d3.scaleOrdinal(d3.schemeCategory10);
+	
+	// dataset = [45, 19, 16, 15, 14, 12, 11, 10, 9,]
+	
+	root.radius = 0;
+	root.fixed = true;
+
+	var force = d3.layout.force()
+		.gravity(0.05)
+		.charge(function(d, i) { return i ? 0 : -2000; })
+		.nodes(nodes)
+		.size([width, height]);
+
+	force.start();
+	
+	svg.selectAll("circle")
+		.data(nodes.slice(1))
+		.enter().append("circle")
+		.attr("r", function(d) { return d.radius; })
+		.style("fill", function(d, i) { return color(i % 3); });
+	
+	
+	svg.selectAll("text")
+		.data(nodes.slice(1))
+		.enter().append("text")
+		.text(function(d) { return d.caption; })
+		.attr("text-anchor", "middle")
+		.attr("font-family", "sans-serif")
+		.attr("fill", "white")
+		.attr("font-size", "16px");
+	
+	force.on("tick", function(e) {
+		var q = d3.geom.quadtree(nodes),
+			i = 0,
+			n = nodes.length;
+			
+		while (++i < n) q.visit(collide(nodes[i]));
+		
+		svg.selectAll("circle")
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; });
+
+		svg.selectAll("text")
+			.attr("x", function(d) { return d.x; })
+			.attr("y", function(d) { return d.y; })
+
+	});
+	
+	svg.on("mousemove", function() {
+		var p1 = d3.mouse(this);
+		root.px = p1[0];
+		root.py = p1[1];
+		force.resume();
+	});
+	
+	function collide(node) {
+		var r = node.radius + 16,
+			nx1 = node.x - r,
+			nx2 = node.x + r,
+			ny1 = node.y - r,
+			ny2 = node.y + r;
+		return function(quad, x1, y1, x2, y2) {
+            if (quad.point && (quad.point !== node)) {
+                var x = node.x - quad.point.x,
+                    y = node.y - quad.point.y,
+                    l = Math.sqrt(x * x + y * y),
+                    r = node.radius + quad.point.radius;
+                if (l < r) {
+                    l = (l - r) / l * .5;
+                    node.x -= x *= l;
+                    node.y -= y *= l;
+                    quad.point.x += x;
+                    quad.point.y += y;
+                }
+            }
+            return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+        };
+    }
 }
 
-var step3 = function() {
-	console.log("3")
-}
 
-var step4 = function() {
-	console.log("4")
-}
+var execution = [step0, step1, step2]
 
+var maxPage = 3; //WARNING: 填写 *页面数量*
 
-
-var execution = [step0, step1, step2, step3, step4]
-
-var maxPage = 5; //WARNING: 填写 *页面数量*
-
+var currentPage = 0
 
 var page_transition = function() {
 	
-	var currentPage = 0
 	console.log("Now is Page " + currentPage)
 	
-	d3.select("#button_up")
+	step0()
+	
+	d3.select("#button_minus")
 	.on("click", function() {
+		
 		if (currentPage != 0) {
+			if (currentPage == 1) {
+				d3.select(this).classed("inactive", true)
+			}
+			
 			currentPage -= 1
-			console.log("Page Changed. Now is Page " + currentPage)
+			console.log("Page Changed. Now is Page! " + (currentPage))
+
 			update_Content(currentPage)
+			
+			if (currentPage == maxPage - 2) {
+				d3.select("#button_plus").classed("inactive", false)
+			}
+			
 		} else {
+			d3.select(this).classed("inactive", true)
 			console.log("stop: no previous page")
 		}
 	})
 	
-	d3.select("#button_down")
+	d3.select("#button_plus")
 	.on("click", function() {
 		if (currentPage != maxPage - 1) {
+			
+			if (currentPage == maxPage - 2) {
+				d3.select(this).classed("inactive", true)
+			}
+			
 			currentPage += 1
-			console.log("Page Changed. Now is Page " + currentPage)
+			console.log("Page Changed. Now is Page " + (currentPage))
+			
 			update_Content(currentPage)
+			
+			if (currentPage == 1) {
+				d3.select("#button_minus").classed("inactive", false)
+			}
+			
 		} else {
+			d3.select(this).classed("inactive", true)
 			console.log("stop: no next page")
 		}
 	})
-	
 	
 	
 }
@@ -62,13 +1401,17 @@ var page_transition = function() {
 //更新页面+执行绘图命令函数，每次换页时调用
 var update_Content = function(page) {
 	
-	//更换intro_zone显示
+	d3.select("svg").remove()
+	
+	//更换intro/interactive_zone显示
 	for (i=0 ; i<maxPage; i++) {
 		if (i == page) {
-			d3.select("#intro_zone_words_"+ page).attr("class", null)
+			d3.select("#intro_zone_words_" + page).classed("hidden", false)
+			d3.select("#interact_zone_elements_" + page).classed("hidden", false)
 			// console.log("show page" + page)
 		} else {
 			d3.select("#intro_zone_words_"+ i).attr("class", "hidden")
+			d3.select("#interact_zone_elements_"+ i).attr("class", "hidden")
 			// console.log("hided page" + i)
 		}
 	}

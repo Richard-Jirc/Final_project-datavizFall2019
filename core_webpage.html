@@ -14,11 +14,11 @@
 			top:0; right:0; left:0; bottom:0;
 			margin: 0;
 			z-index: -2;
+			font-family: Geneva,Tahoma,Verdana,sans-serif;
 		}
 		
-		.hidden {
-			display: none;
-		}
+		.hidden { display: none; }
+		.inactive { pointer-events: none; color:rgb(220,220,220);}
 		
 		#intro_zone {
 			position: absolute;
@@ -27,37 +27,37 @@
 			width: 30%;
 			height: 100%;
 			z-index: -1;
-			
-/*			background-color: #eeeeee;
-*/		}
+		}
 		
 		.intro_zone_words {
 			position: absolute;
 			overflow: scroll;
 			top: 15%; bottom: 15%; left: 6%; right: 6%;
 			padding: 10px;
-			border: 1px dotted #cccccc;
 			
-/*			background: rgb(250, 250, 250);
-*/		}
+			border: 1px dotted #dddddd;
+		}
 		
 		.intro_zone_words p { text-align: justify }
 		.intro_zone_words h1 { position: sticky; top: 0 }
 		
 		
-		.intro_zone_guide {
-			width:100%;
-		}
+		.intro_zone_guide { width:100%; }
+		.intro_zone_guide :hover { font-weight: bold;}
+		.intro_zone_guide :active { color: red; font-size: 103%;}
 		
-		#button_up {
+		
+		#button_minus {
 			position: absolute;
 			top:30px;
 		}
 		
-		#button_down {
+		#button_plus {
 			position: absolute;
 			bottom: 30px;
 		}
+		
+		
 		
 		#svg_zone {
 			position: absolute;
@@ -75,8 +75,9 @@
 			width: 92%;
 			height: 90%;
 			
-			border: 1px dotted #555555;
+			border: 1px dotted #dddddd;
 		}
+		
 		
 		#interact_zone {
 			position: absolute;
@@ -95,7 +96,22 @@
 			width: 92%;
 			height: 70%;
 			
-			border: 1px dotted #555555;
+			border: 1px dotted #dddddd;
+		}
+		
+		
+		#welcome_div {
+			
+		}
+		
+		.pop_numbers {
+			fill: white;
+			text-anchor: middle;
+			opacity: 0.8;
+		}
+		
+		#timelapse_settings {
+			
 		}
 		
 	</style>
@@ -106,72 +122,92 @@
 	<div id="intro_zone">
 		
 		
-		<div class="intro_zone_guide" id="button_up">
-			<p style = "text-align: center">Previous Graph</p>
+		<div class="intro_zone_guide inactive" id="button_minus">
+			<p style = "text-align: center">Previous Section</p>
 		</div>
 		
+		<div class="intro_zone_guide" id="button_plus">
+			<p style = "text-align: center">Next Section</p>
+		</div>
 		
 		<div class="intro_zone_words">
 			
 			<div id="intro_zone_words_0">
-				<h1>Intro_1</h1>
+				<h1>1</h1>
 				<p>
-					我们都知道，只要有意义，那么就必须慎重考虑。 总结的来说， 测试的发生，到底需要如何做到，不测试的发生，又会如何产生。 要想清楚，测试，到底是一种怎么样的存在。 从这个角度来看， 培根曾说过这样一句话，合理安排时间，就等于节约时间。这似乎解答了我的疑惑。 每个人都不得不面对这些问题。 在面对这种问题时， 要想清楚，测试，到底是一种怎么样的存在。 现在，解决测试的问题，是非常非常重要的。 所以， 我们一般认为，抓住了问题的关键，其他一切则会迎刃而解。 一般来说， 对我个人而言，测试不仅仅是一个重大的事件，还可能会改变我的人生。 伏尔泰曾经提到过，坚持意志伟大的事业需要始终不渝的精神。这句话语虽然很短，但令我浮想联翩。 测试，发生了会如何，不发生又会如何。 问题的关键究竟为何？ 吉姆·罗恩说过一句著名的话，要么你主宰生活，要么你被生活主宰。这似乎解答了我的疑惑。 这样看来， 了解清楚测试到底是一种怎么样的存在，是解决一切问题的关键。 而这些并不是完全重要，更加重要的问题是， 测试，发生了会如何，不发生又会如何。 就我个人来说，测试对我的意义，不能不说非常重大。 所谓测试，关键是测试需要如何写。 文森特·皮尔在不经意间这样说过，改变你的想法，你就改变了自己的世界。带着这句话，我们还要更加慎重的审视这个问题： 易卜生曾经说过，伟大的事业，需要决心，能力，组织和责任感。这似乎解答了我的疑惑。 测试，到底应该如何实现。 我们一般认为，抓住了问题的关键，其他一切则会迎刃而解。
+					Human beings have been expediting the Mount Everest (or the Qomolangma) since 1960 and we first summited the peak by a Chinese expedition team led by Shi Zhang-chun. 
+
+From then on, there are a variety of other teams conquered the peak of Mount Everest.
+
 				</p>
 			</div>
 			
 			<div id="intro_zone_words_1" class="hidden">
 				<h1>2</h1>
 				<p>
-					在这种困难的抉择下，本人思来想去，寝食难安。 既然如何， 要想清楚，狗屁不通，到底是一种怎么样的存在。 在这种困难的抉择下，本人思来想去，寝食难安。 了解清楚狗屁不通到底是一种怎么样的存在，是解决一切问题的关键。 现在，解决狗屁不通的问题，是非常非常重要的。 所以， 既然如此， 在这种困难的抉择下，本人思来想去，寝食难安。 奥斯特洛夫斯基曾说过这样一句话，共同的事业，共同的斗争，可以使人们产生忍受一切的力量。　带着这句话，我们还要更加慎重的审视这个问题： 从这个角度来看。
+					If we run deeper into those epic expedition records, there is no doubt that something interesting would be revealed.
+
+Specifically, team xxx(19xx) …
+
+However, team yyy(20xx) …, that was probably because …
+
 				</p>
 			</div>
 			
 			<div id="intro_zone_words_2" class="hidden">
 				<h1>3</h1>
 				<p>
-					好冷，发生了会如何，不发生又会如何。 一般来讲，我们都必须务必慎重的考虑考虑。 从这个角度来看， 那么， 非洲说过一句富有哲理的话，最灵繁的人也看不见自己的背脊。带着这句话，我们还要更加慎重的审视这个问题： 经过上述讨论， 达·芬奇曾经说过，大胆和坚定的决心能够抵得上武器的精良。这似乎解答了我的疑惑。 每个人都不得不面对这些问题。 在面对这种问题时， 既然如此， 一般来讲，我们都必须务必慎重的考虑考虑。 康德曾经提到过，既然我已经踏上这条道路，那么，任何东西都不应妨碍我沿着这条路走下去。这句话语虽然很短，但令我浮想联翩。 
+					There are several discontinuous points in terms of the numbers of successful summited teams, either increasing or declining. Let’s check them out.
+
+					1960 -(improvement 1) 1980 -(improvement 2) 2000 -(earthquake?) 2020s (women summit...)
+					
 				</p>
 			</div>
 			
-			<div id="intro_zone_words_3" class="hidden">
-				<h1>4</h1>
-				<p>
-					生活中，若好困出现了，我们就不得不考虑它出现了的事实。 一般来讲，我们都必须务必慎重的考虑考虑。 所谓好困，关键是好困需要如何写。 现在，解决好困的问题，是非常非常重要的。 所以， 好困，发生了会如何，不发生又会如何。 问题的关键究竟为何？ 要想清楚，好困，到底是一种怎么样的存在。 一般来讲，我们都必须务必慎重的考虑考虑。 要想清楚，好困，到底是一种怎么样的存在。 富勒曾说过这样一句话，苦难磨炼一些人，也毁灭另一些人。我希望诸位也能好好地体会这句话。 问题的关键究竟为何？ 培根曾经说过，深窥自己的心，而后发觉一切的奇迹在你自己。我希望诸位也能好好地体会这句话。 带着这些问题，我们来审视一下好困。 可是，即使是这样，好困的出现仍然代表了一定的意义。 总结的来说， 好困，发生了会如何，不发生又会如何。
-				</p>
-			</div>
-			
-			<div id="intro_zone_words_4" class="hidden">
-				<h1>5</h1>
-				<p>
-				日本谚语曾经提到过，不幸可能成为通向幸福的桥梁。这似乎解答了我的疑惑。 了解清楚生成器牛逼到底是一种怎么样的存在，是解决一切问题的关键。 对我个人而言，生成器牛逼不仅仅是一个重大的事件，还可能会改变我的人生。 我们一般认为，抓住了问题的关键，其他一切则会迎刃而解。 就我个人来说，生成器牛逼对我的意义，不能不说非常重大。 从这个角度来看， 生活中，若生成器牛逼出现了，我们就不得不考虑它出现了的事实。 我们都知道，只要有意义，那么就必须慎重考虑。
-				　　既然如此， 我们都知道，只要有意义，那么就必须慎重考虑。 在这种困难的抉择下，本人思来想去，寝食难安。 所谓生成器牛逼，关键是生成器牛逼需要如何写。 本人也是经过了深思熟虑，在每个日日夜夜思考这个问题。 现在，解决生成器牛逼的问题，是非常非常重要的。 所以， 了解清楚生成器牛逼到底是一种怎么样的存在，是解决一切问题的关键。 富勒在不经意间这样说过，苦难磨炼一些人，也毁灭另一些人。我希望诸位也能好好地体会这句话。 我认为， 那么， 问题的关键究竟为何？ 既然如何， 每个人都不得不面对这些问题。 在面对这种问题时， 本人也是经过了深思熟虑，在每个日日夜夜思考这个问题。 生成器牛逼因何而发生？ 本人也是经过了深思熟虑，在每个日日夜夜思考这个问题。 现在，解决生成器牛逼的问题，是非常非常重要的。 所以， 生成器牛逼，到底应该如何实现。 我们不得不面对一个非常尴尬的事实，那就是， 生成器牛逼，到底应该如何实现。 池田大作曾说过这样一句话，不要回避苦恼和困难，挺起身来向它挑战，进而克服它。我希望诸位也能好好地体会这句话。 而这些并不是完全重要，更加重要的问题是， 经过上述讨论， 带着这些问题，我们来审视一下生成器牛逼。 可是，即使是这样，生成器牛逼的出现仍然代表了一定的意义。 这种事实对本人来说意义重大，相信对这个世界也是有一定意义的。 生成器牛逼的发生，到底需要如何做到，不生成器牛逼的发生，又会如何产生。 
-				</p>
-			</div>
-		</div>
-		
-		
-		<div class="intro_zone_guide" id="button_down">
-			<p style = "text-align: center">Next Graph</p>
 		</div>
 		
 	</div>
 	
 	<!-- 👇 visualization graphs area -->
 	<div id="svg_zone">
-		<div id="svg_zone_Container">
-			<p>svg goes here<br>and here</p>
-		</div>
+		<div id="svg_zone_Container"></div>
 	</div>
 	
 	<!-- 👇 interactive elements will be placed here -->
 	<div id="interact_zone">
-		
 		<div id="interact_zone_elements">
-			<p>buttons, user-inputs</p>
+			
+			<div id="interact_zone_elements_0">
+				
+				<div id="timelapse_settings" class="a">
+					Total Seconds of Timelapse:<br>
+					<input type="number" id="timelapse_second" value = 2>
+					<input type="submit" id="secSubmit" value="GO">
+				</div>
+				
+				<div id="transform_guide" class="hidden">
+					<button type="button" class="back_button" id="timelapse_replay_button"> Replay </button>
+					<button type="button" class="back_button hidden" id="return_button"> Return </button>
+				
+					<button type="button" id="season_classify_transform_button"> Show Season </button>
+					<button type="button" id="hour_classify_transform_button"> Show Time </button>
+					<button type="button" id="barChart_transform_button" class="hidden"> Show Year</button>
+				</div>
+			</div>
+			
+			<div id="interact_zone_elements_1" class="hidden">
+				<p>Take a guess! How long it takes from the base camp to the summit?  </p>
+				<p>Arrange the gold circle as you think and click "Submit" to check</p>
+				<button type="button" id="show_trend_button">Show Result</button>
+			</div>
+			
+			<div id="interact_zone_elements_2" class="hidden">
+				<p>trigger3</p>
+			</div>
+			
 		</div>
 	</div>
 	
-	<script src="modules/module_core.js"></script>
+	<script type="text/javascript"src="modules/module_core.js"></script>
 </body>
 </html> 
