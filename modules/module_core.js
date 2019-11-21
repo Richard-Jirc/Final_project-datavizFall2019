@@ -63,16 +63,13 @@ var step0 = function() {
 		data = d
 		// console.log(data)
 		
-		for (i=0; i < data.length; i++) {
-			if (data[i].smt_clock_obj == null) {
-				console.log("error");
-			}
-		}
-		console.log("complete")
+		// for (i=0; i < data.length; i++) {
+		// 	if (data[i].smt_clock_obj == null) {
+		// 		console.log("error");
+		// 	}
+		// }
+		// console.log("complete")
 		
-		// console.log(data)
-		
-		 
 		var w = WIDTH, h = HEIGHT
 		var lapse_margin = {left: 50, bottom: 50, top: 50, right: 0}
 		
@@ -132,7 +129,7 @@ var step0 = function() {
 			
 			//画顶部月标签
 			var position_array = [[0, 2/12], [2/12, 5/12], [5/12, 8/12], [8/12, 11/12], [11/12, 1]],
-				color_array = ["grey", "grey", "grey", "grey", "grey"],
+				color_array = ["grey", "#cfbaa2", "#b6cfa6", "#dbdaac", "grey"],
 				month_array = ["WINTER", "SPRING", "SUMMER", "AUTUMN", "WINTER"]
 				y = 20,
 				span = w - 50
@@ -172,7 +169,7 @@ var step0 = function() {
 					.transition()
 					.duration("appear")
 					.delay(200)
-				.attr("opacity", 0.5)
+				.attr("opacity", 1)
 			
 			//标签
 			svg.selectAll(".month_name")
@@ -192,7 +189,7 @@ var step0 = function() {
 					.transition()
 					.duration("appear")
 					.delay(200)
-				.attr("opacity", 0.5)
+				.attr("opacity", 1)
 				
 			
 				
@@ -266,7 +263,7 @@ var step0 = function() {
 					.attr("fill", "grey")
 					.attr("text-anchor", "end")
 				.attr("x", w - margin.right)
-				.attr("y", h)
+				.attr("y", h - 2)
 				.text( function(d) {
 					var displayTime = d3.timeFormat("%Y/%m/%d")
 					temp_successCount += 1
@@ -312,7 +309,7 @@ var step0 = function() {
 					.attr("fill", "grey")
 					.attr("text-anchor", "start")
 				.attr("x", 0)
-				.attr("y", h)
+				.attr("y", h - 2)
 				.text(function(d,i) { return 1960 + i })
 				.attr("opacity", 0)
 					.transition()
@@ -372,10 +369,6 @@ var step0 = function() {
 				.attr("fill", function(d) {
 					return year_hueScale(parseFloat(formatYear(d.smt_year_obj)));
 				})
-				
-				d3.select("#barChart_transform_button")
-				.classed("hidden", false);
-				
 				
 				
 			// console.log("circle LOADED")
@@ -461,7 +454,6 @@ var step0 = function() {
 					var suc_p = Math.round((position_dict["suc_" + d] / sum) * 100)
 					var fal_p = 100 - suc_p
 					
-					
 					svg.append("text") //失败率
 					.text(fal_p + "%")
 					.attr("class", "pop_numbers")
@@ -498,6 +490,19 @@ var step0 = function() {
 						return padding + (0.5 + k) * 0.25 * W
 					})
 					.attr("y", H - gap - 10)
+					
+					//季节指示
+					var season = ["SPRING", "SUMMER", "AUTUMN", "WINTER"]
+					
+					svg.append("text")
+					.text(d)
+					.attr("class", "pop_numbers")
+					.text(season[k])
+						.attr("font-size", "20px")
+					.attr("x", function() {
+						return padding + (0.5 + k) * 0.25 * W
+					})
+					.attr("y", H / 2)
 					
 					
 				})
@@ -672,6 +677,19 @@ var step0 = function() {
 						return padding + (0.5 + k) * 0.25 * H + 23
 					})
 					
+					//时段指示
+					var hour = ["0 - 6", "6 - 12", "12 - 18", "18 - 24"]
+					
+					svg.append("text")
+					.text(d)
+					.attr("class", "pop_numbers")
+					.text(hour[k])
+						.attr("font-size", "20px")
+					.attr("y", function() {
+						return padding + (0.5 + k) * 0.25 * H + 10
+					})
+					.attr("x", W / 2)
+					
 				})
 				.on("mouseout", function() {
 					d3.select(this)
@@ -738,7 +756,7 @@ var step0 = function() {
 			//年份内排序号计算
 			for (var k in data) {
 				yearTag = formatYear(data[k].smt_year_obj)
-				// console.log(yearTag)
+				
 				if ((data[k].suc_flag == true)) {
 					year_count_dict[yearTag] += 1
 				}
@@ -836,7 +854,7 @@ var step0 = function() {
 		
 		
 		d3.select("#transform_guide").attr("class", "hidden")
-		
+		d3.select("#return_guide").attr("class", "hidden")
 		d3.select("#timelapse_settings").attr("class", null)
 		
 		
@@ -847,7 +865,9 @@ var step0 = function() {
 		.on("click", function() {
 			var a = document.getElementById("timelapse_second").value
 			
-			draw_timelapse(a)
+			if (a <= 0) { time = 1 } else { time = a }
+			
+			draw_timelapse(time)
 			
 			d3.select("#timelapse_settings").classed("hidden", true)
 			
@@ -862,8 +882,8 @@ var step0 = function() {
 		.on("click", function() {
 			d3.selectAll(".dym_tag").remove()
 			d3.selectAll(".show_elements").remove()
-			d3.select("#timelapse_replay_button").classed("hidden", true);
-			d3.select("#return_button").classed("hidden", false);
+			d3.select("#transform_guide").classed("hidden", true);
+			d3.select("#return_guide").classed("hidden", false);
 			
 			show_season(data)
 			
@@ -874,8 +894,8 @@ var step0 = function() {
 		.on("click", function() {
 			d3.selectAll(".dym_tag").remove()
 			d3.selectAll(".show_elements").remove()
-			d3.select("#timelapse_replay_button").classed("hidden", true);
-			d3.select("#return_button").classed("hidden", false);
+			d3.select("#transform_guide").classed("hidden", true);
+			d3.select("#return_guide").classed("hidden", false);
 			
 			show_clock(data)
 			
@@ -886,8 +906,8 @@ var step0 = function() {
 		.on("click", function() {
 			d3.selectAll(".dym_tag").remove()
 			d3.selectAll(".show_elements").remove()
-			d3.select("#timelapse_replay_button").classed("hidden", true);
-			d3.select("#return_button").classed("hidden", false);
+			d3.select("#transform_guide").classed("hidden", true);
+			d3.select("#return_guide").classed("hidden", false);
 			
 			transform_barChart()
 			
@@ -898,8 +918,8 @@ var step0 = function() {
 		.on("click", function() {
 			svg.selectAll(".show_elements").remove()
 
-			d3.select("#return_button").classed("hidden", true);
-			d3.select("#timelapse_replay_button").classed("hidden", false);
+			d3.select("#return_guide").classed("hidden", true);
+			d3.select("#transform_guide").classed("hidden", false);
 			
 			draw_lapseElements()
 			reset_timelapse()
@@ -927,6 +947,8 @@ var step1 = function() {
 	var h = HEIGHT;
 	var padding = 30;
 	
+	margin = {left: 70, right: 20, top: 50, bottom: 50}
+	
 	var chart1 = svg
 	
 	//creare movable circles
@@ -934,12 +956,21 @@ var step1 = function() {
 
 	var circles = [5350,6100,6400,7350,7900,8850]
 	
+	var xScale = d3.scaleLinear()
+	.domain([0, 80])
+	.range([margin.left, w - margin.right]);
+	
+	var yScale = d3.scaleLinear()
+	.domain([5350,8850])
+	.range([h - margin.bottom, margin.top]);
+	
 	svg.selectAll("circle")
 		.data(circles)
 		.enter()
 		.append("circle")
-		.attr("cx", function (d) { return padding; })
-		.attr("cy", function (d) { return h-(d-5350)/3500*(h-2*padding)-padding; })
+		.attr("class", "drag_circle")
+		.attr("cx", function (d) { return margin.left; })
+		.attr("cy", function (d) { return yScale(d); })
 		.attr("r", radius)
 		.style("fill", "gold")
 		.on("mouseover", function (d) {d3.select(this).style("cursor", "move");})
@@ -948,34 +979,26 @@ var step1 = function() {
 			.on("start", dragstarted)
 			.on("drag", dragged)
 			.on("end", dragended)
-		);
+		)
 	
 	function dragstarted(d) {
 		d3.select(this).raise().classed("active", true);
 	}
 	
+	//限制滑块的活动区间
 	function dragged(d) {
-		d3.select(this).attr("cx", d.x = d3.event.x)
-		//!!!!IF YOU COMMENT OUT BELOW YOU WILL ONLY BE ABLE TO DRAG HORIZONTALLY
-		//.attr("cy", d.y = d3.event.y);
+		d3.select(this).attr("cx", function(){
+			if (d3.event.x >= margin.left && d3.event.x <= w - margin.right) { return d3.event.x }
+			else if (d3.event.x < margin.left) { return margin.left }
+			else if (d3.event.x > w - margin.right) { return w - margin.right }
+		})
 	}
 	
 	function dragended(d) {
 		d3.select(this).classed("active", false);
 	}
-		
-		
-	var xScale = d3.scaleLinear()
-		.domain([0, 80])
-		 //.domain([d3.min(dataset, function(d){ return d[0]; }), d3.max(dataset, function(d) { return d[0]; })])
-		.range([padding, w - padding * 2]);
-		
-	var yScale = d3.scaleLinear()
-		//.domain([d3.min(dataset, function(d){ return d[1]; }), d3.max(dataset, function(d) { return d[1]; })])
-		.domain([5350,8850])
-		.range([h - padding, padding]);
-		
-		
+	
+	
 	var line = d3.line()
 		.x(function(d,i){
 			return xScale(d[0])
@@ -985,56 +1008,53 @@ var step1 = function() {
 		})
 		.curve(d3.curveMonotoneX)
 	
-	var area = d3.area()
-		.x(function(d,i){
-			return xScale(d[0])
-		})
-		.y0(function(d,i){
-			return yScale(d[1])
-		})
-		.y1(function(d,i){
-			return h-padding
-		})
-		.curve(d3.curveMonotoneX)
-		
+	// var area = d3.area()
+	// 	.x(function(d,i){
+	// 		return xScale(d[0])
+	// 	})
+	// 	.y0(function(d,i){
+	// 		return yScale(d[1])
+	// 	})
+	// 	.y1(function(d,i){
+	// 		return h-padding
+	// 	})
+	// 	.curve(d3.curveMonotoneX)
+	
 	legend=[[[0,5350],[80,5350]],[[0,6100],[80,6100]],[[0,6400],[80,6400]],[[0,7350],[80,7350]],[[0,7900],[80,7900]],[[0,8850],[80,8850]]]
 	
 	//draw x Axis and legends
-	
-		
 	for(var i=0; i<legend.length; i++){
 		
 		legendinside = legend[i]
 		
-		d3.select("svg")
-		   .append("path")
+		//画滑块辅助线
+		svg.selectAll(".guide_path")
 		   .data([legendinside])
-		   .attr("d",line)
-		   .attr("fill", "none")//styles the line with attr
+		   .enter()
+		   .append("path")
+		   .attr("d", line)
+		   .attr("fill", "none")
 		   .attr("class", "lines")
 		   .attr("stroke","black")
 		   .attr("opacity",0.5)
 		   .style("stroke-dasharray", ("1, 1"));
-		   
-		innerdataset = legend
 		
-		d3.select("svg")
-		   .selectAll("text")
-		   .data(innerdataset)
+		
+		svg.selectAll("text")
+		   .data(legend)
 		   .enter()
 		   .append("text")
 		   .text(function(d,i){
 			   //console.log(d[0][1])
 			   return d[0][1] + "m"
 		   }) 
-		   .attr("x", w-padding)
+		   .attr("x", 40)
 		   .attr("y", function(d,i){
-			   console.log(yScale(d[0][1]))
-			   return yScale(d[0][1])
+			   return yScale(d[0][1]) + 4;
 			})
-		   .attr("font-family", "sans-serif")
-		   .attr("font-size", "11px")
-		   .attr("fill", "black");
+		   .attr("font-size", "10px")
+		   .attr("text-anchor", "end")
+		   .attr("fill", "#222222");
 	}
 	
 	var formatDay = function(d) {
@@ -1045,8 +1065,7 @@ var step1 = function() {
 		.scale(xScale)
 		.ticks(10)
 		.tickFormat(formatDay);
-		
-		
+	
 	var yAxis = d3.axisLeft()
 		.scale(yScale)
 		.ticks(20);
@@ -1062,9 +1081,7 @@ var step1 = function() {
 		.attr("class","axis")
 		.call(xAxis)
 	
-	//按钮触发显示登顶时间
-	d3.select("#show_trend_button")
-	.on("click", function() {
+	var show_routes = function() {
 		
 		d3.csv("raw_data/N_Col_NE_Ridge_6.csv")
 		.then(function(data) {
@@ -1104,21 +1121,21 @@ var step1 = function() {
 				   .attr("r", 2)
 				   .attr("fill","gold")
 				   
-				//画阴影
-				svg.append("path")
-				   .data([dataset])
-				   .attr("d",area)
-				   .attr("fill", "none")//styles the line with attr
-				   //.attr("class", "lines")
-				   .attr("stroke","none")
-				   .attr("opacity",0)
-				   .transition()
-				   .duration(t)
-				   .delay( function(d,i) {  return time * t})
-				   .attr("opacity",0.05)
-				   .attr("fill","grey")
+				// //画阴影
+				// svg.append("path")
+				//    .data([dataset])
+				//    .attr("d",area)
+				//    .attr("fill", "none")//styles the line with attr
+				//    //.attr("class", "lines")
+				//    .attr("stroke","none")
+				//    .attr("opacity",0)
+				//    .transition()
+				//    .duration(t)
+				//    .delay( function(d,i) {  return time * t})
+				//    .attr("opacity",0.05)
+				//    .attr("fill","grey")
 				   
-				//画面积
+				//画路线
 				svg.append("path")
 				   .data([dataset])
 				   .attr("d",line)
@@ -1129,11 +1146,11 @@ var step1 = function() {
 				   .transition()
 				   .duration(t)
 				   .delay( function(d,i) {  return time * t})
-				   .attr("opacity",1)
+				   .attr("opacity",0.6)
 				   .attr("stroke-width",0.5)
 				   .attr("fill","none")
 			   }
-			   
+			
 			   
 		   })
 		
@@ -1226,8 +1243,12 @@ var step1 = function() {
             }
             return simplified
         }
-		
-
+	}
+	
+	//按钮触发显示登顶时间
+	d3.select("#show_trend_button")
+	.on("click", function() {
+		show_routes()
 	})
 	
 	

@@ -114,6 +114,10 @@
 			
 		}
 		
+		.drag_circle {
+			z-index: 50;
+		}
+		
 	</style>
 </head>
 <body>
@@ -187,12 +191,16 @@ However, team yyy(20xx) …, that was probably because …
 				
 				<div id="transform_guide" class="hidden">
 					<button type="button" class="back_button" id="timelapse_replay_button"> Replay </button>
-					<button type="button" class="back_button hidden" id="return_button"> Return </button>
 				
 					<button type="button" id="season_classify_transform_button"> Show Season </button>
 					<button type="button" id="hour_classify_transform_button"> Show Time </button>
-					<button type="button" id="barChart_transform_button" class="hidden"> Show Year</button>
+					<button type="button" id="barChart_transform_button"> Show Year</button>
 				</div>
+				
+				<div id="return_guide" class="hidden">
+					<button type="button" class="back_button" id="return_button"> Return </button>
+				</div>
+				
 			</div>
 			
 			<div id="interact_zone_elements_1" class="hidden">
