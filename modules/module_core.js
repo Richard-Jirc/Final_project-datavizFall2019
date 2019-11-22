@@ -49,6 +49,7 @@ var step0 = function() {
 			min_locate: parseFloat( formatHour(parseTime( time_calibrate(d.smttime) )) ) * 60 + parseFloat(formatMin(parseTime(time_calibrate(d.smttime)))),
 			day_locate: parseFloat(formatYear_day(parseDate(d.smtdate))),
 			year_locate: (parseFloat(formatYear(parseDate(d.smtdate))) - 1960) * 365 + parseFloat(formatYear_day(parseDate(d.smtdate))),
+			memberNum: parseFloat(d.smtmembers),
 			count: 0,
 			season_position: 0,
 			season_flag: 0,
@@ -134,7 +135,6 @@ var step0 = function() {
 				y = 20,
 				span = w - 50
 			
-			
 			//细线
 			svg.selectAll(".bg_line")
 				.data(position_array)
@@ -149,7 +149,7 @@ var step0 = function() {
 				.attr("stroke-dasharray", "2,2")
 					.attr("opacity", 0)
 					.transition()
-					.duration("appear")
+					.duration(appear)
 					.delay(200)
 				.attr("opacity", 1)
 			
@@ -167,7 +167,7 @@ var step0 = function() {
 				.attr("stroke", function(d,i){ return color_array[i]; })
 					.attr("opacity", 0)
 					.transition()
-					.duration("appear")
+					.duration(appear)
 					.delay(200)
 				.attr("opacity", 1)
 			
@@ -187,12 +187,9 @@ var step0 = function() {
 				.attr("fill", function(d,i) { return color_array[i]; })
 					.attr("opacity", 0)
 					.transition()
-					.duration("appear")
+					.duration(appear)
 					.delay(200)
 				.attr("opacity", 1)
-				
-			
-				
 			
 		}
 		
@@ -249,6 +246,7 @@ var step0 = function() {
 			delay_array.push(endSec * 1000)
 			
 			var temp_successCount = 0 //显示成功次数计数
+			var temp_successPeople = 0
 			
 			//显示登顶时间具体信息
 			svg.selectAll(".event_tag")
@@ -259,7 +257,7 @@ var step0 = function() {
 				.attr("class", "dym_tag")
 				.filter( function(d) { return expd_validcheck(d) })
 					.attr("font-size", "20px")
-					.attr("font-family", "Lucida Console")
+					.attr("font-family", "Helvetica")
 					.attr("fill", "grey")
 					.attr("text-anchor", "end")
 				.attr("x", w - margin.right)
@@ -267,7 +265,7 @@ var step0 = function() {
 				.text( function(d) {
 					var displayTime = d3.timeFormat("%Y/%m/%d")
 					temp_successCount += 1
-					return "success:" + temp_successCount + " " + " " + displayTime(d.smt_year_obj)
+					return temp_successCount + " successful expeditions " +" " + displayTime(d.smt_year_obj)
 				})
 				.attr("opacity", 0)
 					.transition()
@@ -289,6 +287,47 @@ var step0 = function() {
 							d3.select(this).remove()
 						}
 					})
+			
+			//显示登顶人数
+			svg.selectAll(".num_summit")
+				.data(data)
+				.enter()
+				.append("text")
+				.attr("class", "step0")
+				.attr("class", "dym_tag")
+				.filter( function(d) { return expd_validcheck(d) })
+				.attr("font-size", "20px")
+					.attr("font-family", "Helvetica")
+					.attr("fill", "grey")
+					.attr("text-anchor", "end")
+				.attr("x", w - margin.right)
+				.attr("y", h - 24)
+				.text( function(d) {
+					var displayTime = d3.timeFormat("%Y/%m/%d")
+						temp_successPeople += d.memberNum
+					return temp_successPeople + " summitted climbers"
+				})
+				.attr("opacity", 0)
+					.transition()
+					.duration(function(d,i) {
+						return (delay_array[i+1] - delay_array[i])
+					})
+					.delay(function(d,i) {
+						return delayScale(d.year_locate);
+					})
+					.on("start" , function() {
+						d3.select(this)
+						.attr("opacity", 1)
+					})
+					.on("end", function(d,i) {
+						if (i == delay_array.length - 2) {
+							d3.select(this)
+							.attr("opacity", 1)
+						} else {
+							d3.select(this).remove()
+						}
+					})
+				
 			
 			var year_lapse_array = []
 			for (var i=1960; i<=2018; i++) {
@@ -516,6 +555,16 @@ var step0 = function() {
 					.transition()
 					.remove()
 				})
+				.on("click", function(d,i) {
+					if (i == 0) {
+						d3.select("#season_onclick").classed("hidden", false);
+						d3.select("#general_intro").classed("hidden", true);
+					} else {
+						d3.select("#season_onclick").classed("hidden", true);
+						d3.select("#general_intro").classed("hidden", false);
+					}
+					
+				})
 			
 			
 			var gap = 0.1 * (0.25 * W) //组团与月份区边界值
@@ -678,15 +727,15 @@ var step0 = function() {
 					})
 					
 					//时段指示
-					var hour = ["0 - 6", "6 - 12", "12 - 18", "18 - 24"]
+					var hour = ["0:00 - 6:00", "6:00 - 12:00", "12:00 - 18:00", "18:00 - 24:00"]
 					
 					svg.append("text")
 					.text(d)
 					.attr("class", "pop_numbers")
 					.text(hour[k])
-						.attr("font-size", "20px")
+						.attr("font-size", "16px")
 					.attr("y", function() {
-						return padding + (0.5 + k) * 0.25 * H + 10
+						return padding + (0.5 + k) * 0.25 * H + 8;
 					})
 					.attr("x", W / 2)
 					
@@ -700,6 +749,16 @@ var step0 = function() {
 					.classed("inactive", false)
 					.transition()
 					.remove()
+				})
+				.on("click", function(d,i) {
+					if (i == 1) {
+						d3.select("#clock_onclick").classed("hidden", false);
+						d3.select("#general_intro").classed("hidden", true);
+					} else {
+						d3.select("#clock_onclick").classed("hidden", true);
+						d3.select("#general_intro").classed("hidden", false);
+					}
+					
 				})
 			
 			
@@ -882,6 +941,7 @@ var step0 = function() {
 		.on("click", function() {
 			d3.selectAll(".dym_tag").remove()
 			d3.selectAll(".show_elements").remove()
+			
 			d3.select("#transform_guide").classed("hidden", true);
 			d3.select("#return_guide").classed("hidden", false);
 			
@@ -894,6 +954,7 @@ var step0 = function() {
 		.on("click", function() {
 			d3.selectAll(".dym_tag").remove()
 			d3.selectAll(".show_elements").remove()
+			
 			d3.select("#transform_guide").classed("hidden", true);
 			d3.select("#return_guide").classed("hidden", false);
 			
@@ -902,16 +963,16 @@ var step0 = function() {
 		})
 		
 		//年度柱状图变换
-		d3.select("#barChart_transform_button")
-		.on("click", function() {
-			d3.selectAll(".dym_tag").remove()
-			d3.selectAll(".show_elements").remove()
-			d3.select("#transform_guide").classed("hidden", true);
-			d3.select("#return_guide").classed("hidden", false);
-			
-			transform_barChart()
-			
-		});
+		// d3.select("#barChart_transform_button")
+		// .on("click", function() {
+		// 	d3.selectAll(".dym_tag").remove()
+		// 	d3.selectAll(".show_elements").remove()
+		// 	d3.select("#transform_guide").classed("hidden", true);
+		// 	d3.select("#return_guide").classed("hidden", false);
+		//
+		// 	transform_barChart()
+		//
+		// });
 		
 		//返回键
 		d3.select("#return_button")
@@ -920,6 +981,11 @@ var step0 = function() {
 
 			d3.select("#return_guide").classed("hidden", true);
 			d3.select("#transform_guide").classed("hidden", false);
+			
+			d3.select("#general_intro").classed("hidden", false);
+			d3.select("#season_onclick").classed("hidden", true);
+			d3.select("#clock_onclick").classed("hidden", true);
+			d3.select("#year_onclick").classed("hidden", true);
 			
 			draw_lapseElements()
 			reset_timelapse()
@@ -945,23 +1011,34 @@ var step1 = function() {
 	
 	var w = WIDTH;
 	var h = HEIGHT;
-	var padding = 30;
 	
-	margin = {left: 70, right: 20, top: 50, bottom: 50}
+	margin = {left: 70, right: 20, top: 20, bottom: 50}
 	
-	var chart1 = svg
+	d3.select("#guess_start").classed("hidden", false)
+	
+	d3.select("#guess_after").classed("hidden", true)
+		
+	//高亮显示用背景矩形
+	svg.append("rect")
+	.attr("id", "bg_rect")
+	.attr("opacity", 0)
+	.attr("x", 0)
+	.attr("y", 0)
+	.attr("width", w)
+	.attr("height", h)
+	.attr("fill", "black")
 	
 	//creare movable circles
-	var radius = 10;
+	var radius = 7;
 
-	var circles = [5350,6100,6400,7350,7900,8850]
+	var circles = [5180,6100,6500,7010,7775,8230,8850]
 	
 	var xScale = d3.scaleLinear()
 	.domain([0, 80])
 	.range([margin.left, w - margin.right]);
 	
 	var yScale = d3.scaleLinear()
-	.domain([5350,8850])
+	.domain([5000,8850])
 	.range([h - margin.bottom, margin.top]);
 	
 	svg.selectAll("circle")
@@ -972,7 +1049,7 @@ var step1 = function() {
 		.attr("cx", function (d) { return margin.left; })
 		.attr("cy", function (d) { return yScale(d); })
 		.attr("r", radius)
-		.style("fill", "gold")
+		.attr("fill", "#d44d37")
 		.on("mouseover", function (d) {d3.select(this).style("cursor", "move");})
 		.on("mouseout", function (d) {})
 		.call(d3.drag()
@@ -981,21 +1058,72 @@ var step1 = function() {
 			.on("end", dragended)
 		)
 	
+	var cir_coor = []
+	
+	for (var i=0; i<circles.length; i++) {
+		cir_coor.push([margin.left,yScale(circles[i])])
+	}
+	
+	var drag_line = d3.line()
+	.x(function(d) { return d[0]; })
+	.y(function(d,i){
+		return d[1];
+	})
+	.curve(d3.curveMonotoneX)
+	
+	d3.select("svg")
+	.data([cir_coor])
+	.append("path")
+	.attr("id", "drag_path")
+	.attr("d", drag_line)
+	.attr("stroke", "#d44d37")
+	.attr("stroke-width", 1)
+	.attr("fill", "none")
+	
+	
+	var draw_line = function(d) {
+		
+		d3.select("#drag_path").remove()
+		
+		d3.select("svg")
+		.data([d])
+		.append("path")
+		.attr("id", "drag_path")
+		.attr("d", drag_line)
+		.attr("stroke", "#d44d37")
+		.attr("stroke-width", 3)
+		.attr("fill", "none")
+	
+	}
+	
 	function dragstarted(d) {
 		d3.select(this).raise().classed("active", true);
 	}
 	
 	//限制滑块的活动区间
-	function dragged(d) {
+	function dragged(d,i) {
 		d3.select(this).attr("cx", function(){
 			if (d3.event.x >= margin.left && d3.event.x <= w - margin.right) { return d3.event.x }
 			else if (d3.event.x < margin.left) { return margin.left }
 			else if (d3.event.x > w - margin.right) { return w - margin.right }
 		})
+		
+		var k
+		
+		if (d3.event.x >= margin.left && d3.event.x <= w - margin.right) { k = d3.event.x }
+			else if (d3.event.x < margin.left) { k = margin.left }
+			else if (d3.event.x > w - margin.right) { k = w - margin.right }
+		
+		cir_coor[i][0] = k
+		
+		draw_line(cir_coor)
+		
 	}
 	
 	function dragended(d) {
 		d3.select(this).classed("active", false);
+		
+		
 	}
 	
 	
@@ -1020,45 +1148,46 @@ var step1 = function() {
 	// 	})
 	// 	.curve(d3.curveMonotoneX)
 	
-	legend=[[[0,5350],[80,5350]],[[0,6100],[80,6100]],[[0,6400],[80,6400]],[[0,7350],[80,7350]],[[0,7900],[80,7900]],[[0,8850],[80,8850]]]
 	
 	//draw x Axis and legends
-	for(var i=0; i<legend.length; i++){
+	for(var i=0; i<circles.length; i++){
 		
-		legendinside = legend[i]
 		
 		//画滑块辅助线
 		svg.selectAll(".guide_path")
-		   .data([legendinside])
+		   .data(circles)
 		   .enter()
-		   .append("path")
-		   .attr("d", line)
+		   .append("line")
+		   .attr("x1", margin.left)
+		   .attr("x2", w - margin.right)
+		   .attr("y1", function(d){ return yScale(d); })
+		   .attr("y2", function(d){ return yScale(d); })
+		   .attr("class", "guide_path")
 		   .attr("fill", "none")
 		   .attr("class", "lines")
-		   .attr("stroke","black")
-		   .attr("opacity",0.5)
-		   .style("stroke-dasharray", ("1, 1"));
+		   .attr("stroke","#cccccc")
+		   .attr("opacity", 0.3)
+		   .style("stroke-dasharray", ("2, 3"));
 		
-		
+		//画高度标签
 		svg.selectAll("text")
-		   .data(legend)
+		   .data(circles)
 		   .enter()
 		   .append("text")
 		   .text(function(d,i){
-			   //console.log(d[0][1])
-			   return d[0][1] + "m"
+			   return d + "m"
 		   }) 
 		   .attr("x", 40)
 		   .attr("y", function(d,i){
-			   return yScale(d[0][1]) + 4;
+			   return yScale(d) + 4;
 			})
 		   .attr("font-size", "10px")
 		   .attr("text-anchor", "end")
-		   .attr("fill", "#222222");
+		   .attr("fill", "rgb(140, 140, 140)");
 	}
 	
 	var formatDay = function(d) {
-		return "day" + " " + d;
+		return "day " + d;
 	}
 	
 	var xAxis = d3.axisBottom()
@@ -1066,20 +1195,16 @@ var step1 = function() {
 		.ticks(10)
 		.tickFormat(formatDay);
 	
-	var yAxis = d3.axisLeft()
-		.scale(yScale)
-		.ticks(20);
-		
 	d3.select("svg")
 		.append("g")
 		.attr("class","axis")
-		.attr("transform","translate(0,"+ (h-padding) +")")
+		.attr("transform","translate(0,"+ (h-margin.top) +")")
 		.call(xAxis)
 		
-	d3.select("svg")
-		.append("g")
-		.attr("class","axis")
-		.call(xAxis)
+	// d3.select("svg")
+	// 	.append("g")
+	// 	.attr("class","axis")
+	// 	.call(yAxis)
 	
 	var show_routes = function() {
 		
@@ -1087,23 +1212,23 @@ var step1 = function() {
 		.then(function(data) {
 			
 			var parsedData = parseRoute(data)
-			//console.log(parsedData)
 			
 			//画点和线循环，循环数据组数次
-			for(var i=0; i<parsedData.length; i++){
+			for (var i=0; i<parsedData.length; i++) {
 				
 				time = i
 				
 				dataset = parsedData[i];
 				
-				t = 500
+				t = 200
 				 
 				//画节点
 				svg.selectAll(".new")
 				   .data(dataset)
 				   .enter()
 				   .append("circle")
-				   .attr("class", "new")
+				   .classed("camp_circle", true)
+				   .attr("class", function(d,i) { return "camp_circle" + " " + i; })
 				   .attr("cx", function(d) {
 				   		return xScale(d[0]);
 				   })
@@ -1112,46 +1237,32 @@ var step1 = function() {
 				   })
 				   .attr("fill","gold")
 				   .attr("r", 10)
-				   .attr("class", "doned")
 				   .attr("opacity",0)
-				   .transition()
-				   .duration(t)
-				   .delay( function(d,i) {  return time * t})
-				   .attr("opacity",0.8)
+						.transition("pop!")
+						.duration(t)
+						.delay( function(d,i) {  return time * t})
+				   .attr("opacity",1)
 				   .attr("r", 2)
 				   .attr("fill","gold")
 				   
-				// //画阴影
-				// svg.append("path")
-				//    .data([dataset])
-				//    .attr("d",area)
-				//    .attr("fill", "none")//styles the line with attr
-				//    //.attr("class", "lines")
-				//    .attr("stroke","none")
-				//    .attr("opacity",0)
-				//    .transition()
-				//    .duration(t)
-				//    .delay( function(d,i) {  return time * t})
-				//    .attr("opacity",0.05)
-				//    .attr("fill","grey")
 				   
 				//画路线
 				svg.append("path")
 				   .data([dataset])
 				   .attr("d",line)
 				   .attr("fill", "none")//styles the line with attr
-				   .attr("class", "lines")
-				   .attr("stroke","gold")
+				   .attr("class", "climb_path" + " " + time)
+				   .attr("stroke","#ccac2b")
 				   .attr("opacity",0)
-				   .transition()
-				   .duration(t)
-				   .delay( function(d,i) {  return time * t})
-				   .attr("opacity",0.6)
-				   .attr("stroke-width",0.5)
+						.transition("pop!")
+						.duration(t)
+						.delay( function(d,i) {  return time * t})
+				   .attr("opacity", 0.4)
+				   .attr("stroke-width", 1.5)
 				   .attr("fill","none")
-			   }
+			}
 			
-			   
+			
 		   })
 		
 		
@@ -1173,13 +1284,17 @@ var step1 = function() {
 			var simplified = []
 			
 			for(var i in data){
-                var year = data[i].year
-                formatted[i]=[]
-                simplified[i]=[]//each line is an array
-                if(data[i].route!=undefined){
+				
+				var year = data[i].year
+				formatted[i]=[]
+				simplified[i]=[]//each line is an array
+				
+				if (data[i].route!=undefined){
+					
                     var route = data[i].route.split("),").join(")").split(")") // get each route data one by one
                     //console.log(route)
                     var parsedRoute = []
+					
                     for(var r in route){
                         // r is the number of elements in each route array
                         var complete = true
@@ -1230,7 +1345,7 @@ var step1 = function() {
 							simplified[i].push([day, parseInt(elevation)])
 							
 							else{
-							    //simplified[i].push([0,8850])
+							    // simplified[i].push([0,8850])
 								
 							}
                         }
@@ -1245,116 +1360,194 @@ var step1 = function() {
         }
 	}
 	
+	
 	//按钮触发显示登顶时间
 	d3.select("#show_trend_button")
 	.on("click", function() {
+		
 		show_routes()
+		
+		d3.select("#guess_start")
+		.attr("class", "hidden")
+		
+		d3.select("#guess_after")
+		.transition()
+		.delay(64 * 210)
+		.duration(200)
+		.attr("class", null)
+		
 	})
 	
+	
+	sec = 500
+	
+	d3.select("#show_camps")
+	.on("mouseover", function() {
+		d3.select("#bg_rect")
+			.transition()
+			.duration(sec)
+		.attr("opacity", 0.8)
+		
+		d3.selectAll(".camp_circle")
+			.transition("camp_show")
+			.duration(sec)
+		.attr("opacity", 1)
+		.attr("fill", function(d) {
+			var colors = ["#de3c78",
+			"#d84d34",
+			"#d68e27",
+			"#9bb32c",
+			"#469534",
+			"#56c04c",
+			"#626ce1",
+			"#a25dd5",
+			"#d04bba"]
+			
+			var k = d3.select(this).attr("class").slice(-1)
+			
+			return colors[k]
+		})
+		
+		d3.selectAll(".climb_path")
+			.transition("camp_fade")
+			.duration(sec)
+		.attr("stroke", "white")
+		.attr("stroke-width", 1)
+		.attr("opacity", 0.1)
+		
+		d3.selectAll(".drag_circle")
+			.transition()
+			.duration(sec)
+		.attr("fill", "gold")
+		
+		d3.selectAll("#drag_path")
+			.transition()
+			.duration(sec)
+		.attr("stroke", "gold")
+		
+	})
+	.on("mouseout", function() {
+		d3.select("#bg_rect")
+			.transition()
+			.duration(sec)
+		.attr("opacity", 0)
+		
+		d3.selectAll(".camp_circle")
+			.transition()
+			.duration(sec)
+		.attr("fill", "gold")
+		.attr("opacity", 1)
+		
+		d3.selectAll(".climb_path")
+			.transition()
+			.duration(sec)
+		.attr("stroke", "#ccac2b")
+		.attr("stroke-width", 2)
+		.attr("opacity", 0.4)
+		
+		d3.selectAll(".drag_circle")
+			.transition("camp_fade")
+			.duration(sec)
+		.attr("fill", "#d44d37")
+		
+		d3.selectAll("#drag_path")
+			.transition("camp_fade")
+			.duration(sec)
+		.attr("stroke", "#d44d37")
+		
+	})
+	
+	var get_seq = function(d) {
+		return parseFloat(d.slice(d.length - 2, d.length))
+	}
+	
+	d3.select("#show_lines")
+	.on("mouseover", function() {
+		
+		d3.select("#bg_rect")
+			.transition()
+			.duration(sec)
+		.attr("opacity", 0.8)
+		
+		d3.selectAll(".climb_path")
+			.transition("climb_show")
+			.duration(sec)
+		.attr("stroke-width", 1)
+		.attr("opacity", 0.6)
+		.filter(function() {
+			var k = get_seq(d3.select(this).attr("class"))
+			return k <= 64
+		})
+		.attr("stroke", function(d,i) {
+			
+			var scale = d3.scaleLinear()
+			.domain([0, 64])
+			.range(["rgb(0,0,255)", "rgb(0,255,0)"])
+			
+			var k = get_seq(d3.select(this).attr("class"))
+			
+			return scale(k)
+		})
+		
+		d3.selectAll(".camp_circle")
+			.transition("climb_fade")
+			.duration(sec)
+		.attr("fill", "white")
+		.attr("opacity", 0.2)
+		
+		d3.selectAll(".drag_circle")
+			.transition()
+			.duration(sec)
+		.attr("fill", "gold")
+		
+		d3.selectAll("#drag_path")
+			.transition()
+			.duration(sec)
+		.attr("stroke", "gold")
+	})
+	.on("mouseout", function() {
+		
+		d3.select("#bg_rect")
+			.transition()
+			.duration(sec)
+		.attr("opacity", 0)
+		
+		d3.selectAll(".climb_path")
+			.transition()
+			.duration(sec)
+		.attr("stroke-width", 2)
+		.attr("opacity", 0.4)
+		.attr("stroke", "#ccac2b")
+		
+		d3.selectAll(".camp_circle")
+			.transition()
+			.duration(sec)
+		.attr("fill", "gold")
+		.attr("opacity", 1)
+		
+		d3.selectAll(".drag_circle")
+			.transition("camp_fade")
+			.duration(sec)
+		.attr("fill", "#d44d37")
+		
+		d3.selectAll("#drag_path")
+			.transition("camp_fade")
+			.duration(sec)
+		.attr("stroke", "#d44d37")
+		
+	})
 	
 }
 
 var step2 = function() {
 	
-	console.log("step2 LOADED?")
+	console.log("step2 LOADED")
 	
-	svg = create_svg()
+	d3.select("#step2")
+	.classed("hidden", false)
+	.attr("width", WIDTH)
+	.attr("height", HEIGHT)
 	
-	//The screen
-	// var array = []
-	var width = WIDTH;
-	var height = HEIGHT;
-	
-	//The nodes
-	dataset = [[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
-			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
-			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
-			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
-			[' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1], [' ', 1],
-			['Alpine Ascents Intl.', 19], ['Himalayan Experience (Himex)', 16], ['SummitClimb', 15], ['Kobler & Partners', 14],
-			['Jagged Globe', 12], ['Adventure Consultants', 11], ['Seven Summit Treks', 10], ['Mountain Guides(IMG)', 9], ["Adventure Peaks", 8]];
-			
-	
-	var nodes = dataset.map(function(d) { return {radius:  d[1] * 8 + 10, caption: d[0]};}),
-			root = nodes[0],
-			color = d3.scaleOrdinal(d3.schemeCategory10);
-	
-	// dataset = [45, 19, 16, 15, 14, 12, 11, 10, 9,]
-	
-	root.radius = 0;
-	root.fixed = true;
-
-	var force = d3.layout.force()
-		.gravity(0.05)
-		.charge(function(d, i) { return i ? 0 : -2000; })
-		.nodes(nodes)
-		.size([width, height]);
-
-	force.start();
-	
-	svg.selectAll("circle")
-		.data(nodes.slice(1))
-		.enter().append("circle")
-		.attr("r", function(d) { return d.radius; })
-		.style("fill", function(d, i) { return color(i % 3); });
-	
-	
-	svg.selectAll("text")
-		.data(nodes.slice(1))
-		.enter().append("text")
-		.text(function(d) { return d.caption; })
-		.attr("text-anchor", "middle")
-		.attr("font-family", "sans-serif")
-		.attr("fill", "white")
-		.attr("font-size", "16px");
-	
-	force.on("tick", function(e) {
-		var q = d3.geom.quadtree(nodes),
-			i = 0,
-			n = nodes.length;
-			
-		while (++i < n) q.visit(collide(nodes[i]));
-		
-		svg.selectAll("circle")
-			.attr("cx", function(d) { return d.x; })
-			.attr("cy", function(d) { return d.y; });
-
-		svg.selectAll("text")
-			.attr("x", function(d) { return d.x; })
-			.attr("y", function(d) { return d.y; })
-
-	});
-	
-	svg.on("mousemove", function() {
-		var p1 = d3.mouse(this);
-		root.px = p1[0];
-		root.py = p1[1];
-		force.resume();
-	});
-	
-	function collide(node) {
-		var r = node.radius + 16,
-			nx1 = node.x - r,
-			nx2 = node.x + r,
-			ny1 = node.y - r,
-			ny2 = node.y + r;
-		return function(quad, x1, y1, x2, y2) {
-            if (quad.point && (quad.point !== node)) {
-                var x = node.x - quad.point.x,
-                    y = node.y - quad.point.y,
-                    l = Math.sqrt(x * x + y * y),
-                    r = node.radius + quad.point.radius;
-                if (l < r) {
-                    l = (l - r) / l * .5;
-                    node.x -= x *= l;
-                    node.y -= y *= l;
-                    quad.point.x += x;
-                    quad.point.y += y;
-                }
-            }
-            return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-        };
-    }
 }
 
 
@@ -1379,7 +1572,11 @@ var page_transition = function() {
 			}
 			
 			currentPage -= 1
-			console.log("Page Changed. Now is Page! " + (currentPage))
+			console.log("Page Changed. Now is Page " + (currentPage))
+			
+			if (currentPage == 1) {
+				d3.select("#step2").attr("class", "hidden")
+			}
 
 			update_Content(currentPage)
 			
@@ -1440,6 +1637,7 @@ var update_Content = function(page) {
 	execution[page]()
 }
 
+d3.select("#welcome_go")
 
 page_transition()
 

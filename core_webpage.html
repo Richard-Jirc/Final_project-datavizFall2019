@@ -17,8 +17,20 @@
 			font-family: Geneva,Tahoma,Verdana,sans-serif;
 		}
 		
+		p {
+			line-height: 20px;
+		}
+		
 		.hidden { display: none; }
 		.inactive { pointer-events: none; color:rgb(220,220,220);}
+		
+		#welcome_div {
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+		}
 		
 		#intro_zone {
 			position: absolute;
@@ -34,8 +46,9 @@
 			overflow: scroll;
 			top: 15%; bottom: 15%; left: 6%; right: 6%;
 			padding: 10px;
+			background-color: #f7f7f7;
 			
-			border: 1px dotted #dddddd;
+			border: 1px dotted #eeeeee;
 		}
 		
 		.intro_zone_words p { text-align: justify }
@@ -43,8 +56,8 @@
 		
 		
 		.intro_zone_guide { width:100%; }
-		.intro_zone_guide :hover { font-weight: bold;}
-		.intro_zone_guide :active { color: red; font-size: 103%;}
+		.intro_zone_guide :hover { font-weight: bold; font-size: 102%;}
+		.intro_zone_guide :active { color: red; font-size: 104%;}
 		
 		
 		#button_minus {
@@ -75,9 +88,18 @@
 			width: 92%;
 			height: 90%;
 			
-			border: 1px dotted #dddddd;
-		}
+/*			border: 1px dotted #dddddd;
+*/		}
 		
+		#step2 {
+			position: absolute;
+			top: 30px;
+			left: 5%;
+			width: 92%;
+			height: 90%;
+			z-index: 200;
+			border: none;
+		}
 		
 		#interact_zone {
 			position: absolute;
@@ -88,6 +110,8 @@
 			z-index: -1;
 		}
 		
+		
+		
 		#interact_zone_elements {
 			overflow: hidden;
 			position: absolute;
@@ -96,13 +120,11 @@
 			width: 92%;
 			height: 70%;
 			
-			border: 1px dotted #dddddd;
-		}
+/*			border: 1px dotted #dddddd;
+*/		}
 		
 		
-		#welcome_div {
-			
-		}
+		
 		
 		.pop_numbers {
 			fill: white;
@@ -114,13 +136,30 @@
 			
 		}
 		
-		.drag_circle {
-			z-index: 50;
+		#guess_after p :hover {
+			font-weight: bold;
+			font-size:103%;
 		}
+		
+		.axis .domain {
+			stroke-dasharray: 1,1;
+			stroke-width: 1;
+		}
+		
+		.axis .tick text {
+			fill: rgb(140, 140, 140);
+		}
+		
+		
+		
 		
 	</style>
 </head>
 <body>
+	
+	<div id="welcome_div" class="hidden">
+		<p id="welcome_go">LET'S DO IT</p>
+	</div>
 	
 	<!-- 👇 Introductory words and pictures of each page -->
 	<div id="intro_zone">
@@ -137,34 +176,54 @@
 		<div class="intro_zone_words">
 			
 			<div id="intro_zone_words_0">
-				<h1>1</h1>
-				<p>
-					Human beings have been expediting the Mount Everest (or the Qomolangma) since 1960 and we first summited the peak by a Chinese expedition team led by Shi Zhang-chun. 
-
-From then on, there are a variety of other teams conquered the peak of Mount Everest.
-
-				</p>
+				<div id="general_intro">
+					<h1>General Overview of Expeditions</h1>
+					<p>Because Mount Everest is the highest mountain in the world, it has attracted considerable attention and climbing attempts.</p>
+					<p>Everest's first known summitting occurred by 1953, and interest by climbers increased. </p>
+					<p>Despite the effort and attention poured into expeditions, only about 200 people had summitted by 1987.</p>
+					<p>Everest remained a difficult climb for decades, even for serious attempts by professional climbers and large national expeditions, which were the norm until the commercial era began in the 1990s.</p>
+				</div>
+				<div id="season_onclick" class="hidden">
+					<h1>Why these seasons?</h1>
+					<p>There are two windows for expeditions in Mount Everest every year, from April to June and September to October.</p>
+					<p>Because the north slope of Mount Everest began to enter the rainy season in June, until September of that year, in which the months of July and August have the most rainfall.</p>
+					<p>between 7,000 and 9000 meters above sea level, winds will be strongest from January to March, November to December.</p>
+					<p>Apart from these two factors, there are only two windows left for expeditions every year: from April to June and September to October, so most expedition teams will choose to climb Mount Everest during these two windows.</p>
+				</div>
+				<div id="clock_onclick" class="hidden">
+					<h1>Do you know..?</h1>
+					<p>Usually, the last section of the expeditions to the summit must start at around 1am.</p>
+					<p>The most important reason to get up early is to comply with the "closing time" and complete the climbing before the time, which can effectively reduce the risk of climbing. If duration of the expedition exceeds this time, any team must return unconditionally.</p>
+					<p>For Mount Everest, the "closing time" is 2pm.</p>
+					
+				</div>
+				<div id="year_onclick" class="hidden">
+					<h1>What happened?</h1>
+					<p></p>
+				</div>
 			</div>
 			
 			<div id="intro_zone_words_1" class="hidden">
-				<h1>2</h1>
-				<p>
-					If we run deeper into those epic expedition records, there is no doubt that something interesting would be revealed.
-
-Specifically, team xxx(19xx) …
-
-However, team yyy(20xx) …, that was probably because …
-
-				</p>
+				<div id="intro_before_guess">
+					<h1>Routes, Camps & Time</h1>
+					<p>Mount Everest has two main climbing routes, the southeast ridge from Nepal and the north ridge from Tibet, as well as many other less frequently climbed routes.</p>
+					<p>The north ridge route begins from the north side of Everest, in Tibet. Expeditions trek to the Rongbuk Glacier, setting up base camp at 5180 m on a gravel plain just below the glacier.</p>
+					<p>To reach Camp II, climbers ascend the medial moraine of the east Rongbuk Glacier up to the base of Changtze, at around 6,100 m. Camp III (ABC—Advanced Base Camp) is situated below the North Col at 6500 m.</p>
+					<p>To reach Camp IV on the North Col, climbers ascend the glacier to the foot of the col where fixed ropes are used to reach the North Col at 7010 m.</p>
+					<p>From the North Col, climbers ascend the rocky north ridge to set up Camp V at around 7775 m. The route crosses the North Face in a diagonal climb to the base of the Yellow Band, reaching the site of Camp VI at 8230 m. From Camp VI, climbers make their final summit push.</p>
+				</div>
+				
 			</div>
 			
 			<div id="intro_zone_words_2" class="hidden">
-				<h1>3</h1>
-				<p>
-					There are several discontinuous points in terms of the numbers of successful summited teams, either increasing or declining. Let’s check them out.
-
-					1960 -(improvement 1) 1980 -(improvement 2) 2000 -(earthquake?) 2020s (women summit...)
-					
+				<h1>Captions of Sponsors</h1>
+				<p>To conquer Mount Everest, we really need collaborations and resources.</p>
+				<p>Teams succeed are mostly supported by capitals from expedition organizations.</p>
+				<p>See what data wants you to know.</p>
+				<p>To our surprise, small independent expedition teams has the most records (45) in terms of summiting Mount Everest, which is way more
+					than a big expedition organization called Alpine Ascents International
+					holding the 19 record.</p>
+				<p>Bravos to those brave individuals!</p>
 				</p>
 			</div>
 			
@@ -174,7 +233,9 @@ However, team yyy(20xx) …, that was probably because …
 	
 	<!-- 👇 visualization graphs area -->
 	<div id="svg_zone">
-		<div id="svg_zone_Container"></div>
+		<div id="svg_zone_Container">
+		</div>
+		<iframe src='modules/SponsorCollisionDetectionCustomized.html' id="step2" class="hidden"></iframe>
 	</div>
 	
 	<!-- 👇 interactive elements will be placed here -->
@@ -184,34 +245,46 @@ However, team yyy(20xx) …, that was probably because …
 			<div id="interact_zone_elements_0">
 				
 				<div id="timelapse_settings" class="a">
-					Total Seconds of Timelapse:<br>
-					<input type="number" id="timelapse_second" value = 2>
+					<p>Please type total seconds of timelapse:</p>
+					<input type="number" id="timelapse_second" value = 40>
 					<input type="submit" id="secSubmit" value="GO">
 				</div>
 				
 				<div id="transform_guide" class="hidden">
+					<p>Each dot is a successful expedition. Blue ones are earlier. Try clicking buttons below to see some quick facts!</p>
 					<button type="button" class="back_button" id="timelapse_replay_button"> Replay </button>
 				
 					<button type="button" id="season_classify_transform_button"> Show Season </button>
 					<button type="button" id="hour_classify_transform_button"> Show Time </button>
-					<button type="button" id="barChart_transform_button"> Show Year</button>
+					<button type="button" id="barChart_transform_button" class="hidden"> Show Year</button>
 				</div>
 				
 				<div id="return_guide" class="hidden">
+					<p>Try hover your mouse over the chart! You may click on the yellow ones!</p>
 					<button type="button" class="back_button" id="return_button"> Return </button>
 				</div>
 				
 			</div>
 			
 			<div id="interact_zone_elements_1" class="hidden">
-				<p>Take a guess! How long it takes from the base camp to the summit?  </p>
-				<p>Arrange the gold circle as you think and click "Submit" to check</p>
-				<button type="button" id="show_trend_button">Show Result</button>
+				
+				<div id="guess_start">
+					<p>Take a guess! How long it takes from the base camp to the summit?<br>
+						Arrange the circle as you like and click "Submit" to compare with real records!</p>
+					<button type="button" id="show_trend_button">Submit</button>
+				</div>
+				
+				<div id="guess_after" class="hidden">
+					
+					<p style="pointer-events:none;">Try hover your mouse over labels below!</p>
+					<p id="show_camps" style="text-decoration: underline"> See Camps: different color for different camps</p>
+					<p id="show_lines" style="text-decoration: underline"> See Climbs: blue paths for earlier expeditions</p>
+					
+				</div>
+				
 			</div>
 			
-			<div id="interact_zone_elements_2" class="hidden">
-				<p>trigger3</p>
-			</div>
+			<div id="interact_zone_elements_2" class="hidden"></div>
 			
 		</div>
 	</div>
