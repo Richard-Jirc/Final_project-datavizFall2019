@@ -919,9 +919,70 @@ var step0 = function() {
 		
 		draw_lapseElements()
 		
+		console.log("!")
+		
 		//开始time lapse
+		//快
+		d3.select("#time_Fast")
+		.on("click", function() {
+			
+			var time = 10
+			
+			console.log(time)
+			
+			draw_timelapse(time)
+			
+			d3.select("#timelapse_settings").classed("hidden", true)
+			
+			d3.select("#transform_guide")
+			.transition()
+			.delay(time * 1000)
+			.attr("class", null)
+		})
+		
+		//中等
+		d3.select("#time_Normal")
+		.on("click", function() {
+			
+			var time = 30
+			
+			console.log(time)
+			
+			draw_timelapse(time)
+			
+			d3.select("#timelapse_settings").classed("hidden", true)
+			
+			d3.select("#transform_guide")
+			.transition()
+			.delay(time * 1000)
+			.attr("class", null)
+		})
+		
+		//慢
+		d3.select("#time_Slow")
+		.on("click", function() {
+			
+			var time = 60
+			
+			console.log(time)
+			
+			draw_timelapse(time)
+			
+			d3.select("#timelapse_settings").classed("hidden", true)
+			
+			d3.select("#transform_guide")
+			.transition()
+			.delay(time * 1000)
+			.attr("class", null)
+		})
+		
+		
+		//自选秒数
 		d3.select("#secSubmit")
 		.on("click", function() {
+			
+			
+			
 			var a = document.getElementById("timelapse_second").value
 			
 			if (a <= 0) { time = 1 } else { time = a }
@@ -935,6 +996,7 @@ var step0 = function() {
 			.delay(a * 1000)
 			.attr("class", null)
 		})
+		
 		
 		//按季度分类变换
 		d3.select("#season_classify_transform_button")

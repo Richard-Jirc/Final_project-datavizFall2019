@@ -245,7 +245,12 @@
 			<div id="interact_zone_elements_0">
 				
 				<div id="timelapse_settings" class="a">
-					<p>Please type total seconds of timelapse:</p>
+					
+					<button type="button" id="time_Fast">Fast (10 sec)</button>
+					<button type="button" id="time_Normal">Normal (30 sec)</button>
+					<button type="button" id="time_Slow">Slow (60 sec)</button>
+					
+					<p>Or do you have your own preference? Type seconds:</p>
 					<input type="number" id="timelapse_second" value = 40>
 					<input type="submit" id="secSubmit" value="GO">
 				</div>
@@ -254,8 +259,8 @@
 					<p>Each dot is a successful expedition. Blue ones are earlier. Try clicking buttons below to see some quick facts!</p>
 					<button type="button" class="back_button" id="timelapse_replay_button"> Replay </button>
 				
-					<button type="button" id="season_classify_transform_button"> Show Season </button>
-					<button type="button" id="hour_classify_transform_button"> Show Time </button>
+					<button type="button" id="season_classify_transform_button"> Sort by Season </button>
+					<button type="button" id="hour_classify_transform_button"> Sort by Summit Time </button>
 					<button type="button" id="barChart_transform_button" class="hidden"> Show Year</button>
 				</div>
 				
