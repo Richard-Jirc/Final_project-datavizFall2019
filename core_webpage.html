@@ -39,35 +39,45 @@
 			width: 30%;
 			height: 100%;
 			z-index: -1;
+			background-color: #f1f1f1;
 		}
 		
 		.intro_zone_words {
 			position: absolute;
 			overflow: scroll;
-			top: 15%; bottom: 15%; left: 6%; right: 6%;
+			top: 30px; left: 20px; right: 20px;
 			padding: 10px;
-			background-color: #f7f7f7;
-			
+			height: 70%;
+			z-index: 3;
+			background-color: #ffffff;
+
+/*			border: 1px dotted #eeeeee;
+*/		}
+		
+		.intro_zone_words p { text-align: justify; font-size: 85%;}
+		.intro_zone_words h1 { position: sticky; top: 0; font-size: 140%; }
+		
+		
+		.intro_zone_guide {
+			position: absolute;
+			bottom: 30px;
+			z-index: 3;
+			padding: 6px;
 			border: 1px dotted #eeeeee;
+			font-size: 120%;
 		}
-		
-		.intro_zone_words p { text-align: justify }
-		.intro_zone_words h1 { position: sticky; top: 0 }
-		
-		
-		.intro_zone_guide { width:100%; }
-		.intro_zone_guide :hover { font-weight: bold; font-size: 102%;}
+		.intro_zone_guide :hover { font-weight: bold; font-size: 104%;}
 		.intro_zone_guide :active { color: red; font-size: 104%;}
 		
 		
 		#button_minus {
 			position: absolute;
-			top:30px;
+			left: 20px;
 		}
 		
 		#button_plus {
 			position: absolute;
-			bottom: 30px;
+			right: 20px;
 		}
 		
 		
@@ -111,7 +121,6 @@
 		}
 		
 		
-		
 		#interact_zone_elements {
 			overflow: hidden;
 			position: absolute;
@@ -120,8 +129,8 @@
 			width: 92%;
 			height: 70%;
 			
-/*			border: 1px dotted #dddddd;
-*/		}
+/*			border: 1px dotted #dddddd;*/
+		}
 		
 		
 		
@@ -166,11 +175,11 @@
 		
 		
 		<div class="intro_zone_guide inactive" id="button_minus">
-			<p style = "text-align: center">Previous Section</p>
+			<p>PREV</p>
 		</div>
 		
 		<div class="intro_zone_guide" id="button_plus">
-			<p style = "text-align: center">Next Section</p>
+			<p>NEXT</p>
 		</div>
 		
 		<div class="intro_zone_words">
@@ -253,6 +262,7 @@
 					<p>Or do you have your own preference? Type seconds:</p>
 					<input type="number" id="timelapse_second" value = 40>
 					<input type="submit" id="secSubmit" value="GO">
+					
 				</div>
 				
 				<div id="transform_guide" class="hidden">

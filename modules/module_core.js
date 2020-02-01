@@ -211,7 +211,7 @@ var step0 = function() {
 			
 			//控制动画时间数据
 			var startTime = 200, endSec = sec
-			var long = 3000, short = 200
+			var long = sec / 20 * 1000, short = 200
 		
 			var year_locate_array = [] //delay, duration的scale函数调用
 		
@@ -594,6 +594,8 @@ var step0 = function() {
 			d3.selectAll(".expedition_circles")
 			.attr("opacity", 1)
 			.transition()
+				.duration(400)
+				.delay(100)
 			.attr("cx", function(d) {
 				return xPosit(d)
 			})
@@ -791,6 +793,8 @@ var step0 = function() {
 			})
 			.attr("opacity", 1)
 			.transition()
+				.duration(400)
+				.delay(100)
 			.attr("cx", function(d) {
 				return xPosit(d)
 			})
@@ -901,6 +905,8 @@ var step0 = function() {
 			
 			svg.selectAll(".expedition_circles")
 			.transition()
+				.delay(200)
+				.duration(400)
 			.attr("opacity", 0.6)
 			.attr("cx", function(d) {
 				return dateScale(d.day_locate);
@@ -980,7 +986,6 @@ var step0 = function() {
 		//自选秒数
 		d3.select("#secSubmit")
 		.on("click", function() {
-			
 			
 			
 			var a = document.getElementById("timelapse_second").value
