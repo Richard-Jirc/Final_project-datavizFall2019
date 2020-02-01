@@ -211,7 +211,7 @@ var step0 = function() {
 			
 			//控制动画时间数据
 			var startTime = 200, endSec = sec
-			var long = sec / 20 * 1000, short = 200
+			var long = sec / 10 * 1000, short = 200
 		
 			var year_locate_array = [] //delay, duration的scale函数调用
 		
