@@ -1,5 +1,3 @@
-
-
 var width_DOM = d3.select("#svg_zone_Container").style("width")
 var height_DOM = d3.select("#svg_zone_Container").style("height")
 	
@@ -1707,6 +1705,5 @@ var update_Content = function(page) {
 d3.select("#welcome_go")
 
 page_transition()
-
 
 console.log("end")
