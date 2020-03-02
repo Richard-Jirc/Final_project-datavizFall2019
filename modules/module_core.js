@@ -1173,7 +1173,7 @@ var step1 = function() {
 			else if (d3.event.x > w - margin.right) { return w - margin.right }
 		})
 		
-		var k
+		var k;
 		
 		if (d3.event.x >= margin.left && d3.event.x <= w - margin.right) { k = d3.event.x }
 			else if (d3.event.x < margin.left) { k = margin.left }
